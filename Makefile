@@ -18,7 +18,9 @@ help: ## Show available commands.
 check: $(VENV_DIR)/bin/prek ## Run code quality checks.
 	$(VENV_PYTHON) -m prek run --all-files
 
-venv: $(VENV_DIR) ## Create the virtual environment and install dependencies.
+venv: ## Create or update the virtual environment.
+	rm -rf $(VENV_DIR)
+	@$(MAKE) $(VENV_DIR)
 
 $(VENV_DIR)/bin/%: $(VENV_DIR)
 	@test -f $@ || (rm -rf $(VENV_DIR) && $(MAKE) $(VENV_DIR))
