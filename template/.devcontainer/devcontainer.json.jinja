@@ -1,33 +1,33 @@
 {
-  "name":"{{ project_name_kebab_case }}",
+  "name": "{{ project_name_kebab_case }}",
   "image": "mcr.microsoft.com/devcontainers/python:3-{{ python_version }}",
   "mounts": [
     "source=${localEnv:HOME}/.cache/pip,target=/home/vscode/.cache/pip,type=bind",
     "source=${localEnv:HOME}/.cache/{{ pre_commit_tool }},target=/home/vscode/.cache/{{ pre_commit_tool }},type=bind"
   ],
-  "postStartCommand":"rm -rf .venv && make git venv check",
-  "customizations":{
-    "vscode":{
-      "extensions":[
+  "postStartCommand": "rm -rf .venv && make git venv check",
+  "customizations": {
+    "vscode": {
+      "extensions": [
         "GitHub.copilot-chat",
         "charliermarsh.ruff",
         "ms-azuretools.vscode-docker",
-{%- if typing %}
+        {%- if typing %}
         "ms-python.mypy-type-checker",
-{%- endif %}
+        {%- endif %}
         "ms-python.python"
       ],
-      "settings":{
-        "editor.bracketPairColorization.enabled":true,
-        "editor.codeActionsOnSave":{
-          "source.fixAll":"explicit",
-          "source.organizeImports":"explicit"
+      "settings": {
+        "editor.bracketPairColorization.enabled": true,
+        "editor.codeActionsOnSave": {
+          "source.fixAll": "explicit",
+          "source.organizeImports": "explicit"
         },
-        "editor.formatOnSave":true,
-        "[python]":{
-          "editor.defaultFormatter":"charliermarsh.ruff"
+        "editor.formatOnSave": true,
+        "[python]": {
+          "editor.defaultFormatter": "charliermarsh.ruff"
         },
-        "python.terminal.activateEnvironment":true
+        "python.terminal.activateEnvironment": true
       }
     }
   }

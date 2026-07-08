@@ -1,30 +1,30 @@
 {
-  "name":"project_template",
+  "name": "project_template",
   "image": "mcr.microsoft.com/devcontainers/python:3-3.12",
   "mounts": [
     "source=${localEnv:HOME}/.cache/pip,target=/home/vscode/.cache/pip,type=bind",
     "source=${localEnv:HOME}/.cache/prek,target=/home/vscode/.cache/prek,type=bind"
   ],
-  "postStartCommand":"rm -rf .venv && make git venv check",
-  "customizations":{
-    "vscode":{
-      "extensions":[
+  "postStartCommand": "rm -rf .venv && make git venv check",
+  "customizations": {
+    "vscode": {
+      "extensions": [
         "GitHub.copilot-chat",
         "charliermarsh.ruff",
         "ms-azuretools.vscode-docker",
         "ms-python.python"
       ],
-      "settings":{
-        "editor.bracketPairColorization.enabled":true,
-        "editor.codeActionsOnSave":{
-          "source.fixAll":"explicit",
-          "source.organizeImports":"explicit"
+      "settings": {
+        "editor.bracketPairColorization.enabled": true,
+        "editor.codeActionsOnSave": {
+          "source.fixAll": "explicit",
+          "source.organizeImports": "explicit"
         },
-        "editor.formatOnSave":true,
-        "[python]":{
-          "editor.defaultFormatter":"charliermarsh.ruff"
+        "editor.formatOnSave": true,
+        "[python]": {
+          "editor.defaultFormatter": "charliermarsh.ruff"
         },
-        "python.terminal.activateEnvironment":true
+        "python.terminal.activateEnvironment": true
       }
     }
   }

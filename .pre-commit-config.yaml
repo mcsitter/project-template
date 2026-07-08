@@ -27,6 +27,12 @@ repos:
         args:
           - "--option"
           - "array_auto_collapse=false"
+  - repo: https://github.com/biomejs/pre-commit
+    rev: v2.5.2
+    hooks:
+      - id: biome-format
+        args:
+          - "--indent-style=space"
   - repo: https://github.com/commitizen-tools/commitizen
     rev: v4.16.4
     hooks:
