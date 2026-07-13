@@ -35,6 +35,9 @@ $(VENV_DIR): pyproject.toml
 	$(VENV_PYTHON) -m prek install --hook-type commit-msg commitizen
 	$(VENV_PYTHON) -m prek autoupdate
 
+copier-update: $(VENV_DIR)/bin/copier ## Update project files from the Copier template.
+	$(VENV_PYTHON) -m copier update
+
 clean: ## Remove untracked files (keeps the .venv folder and .env files).
 	@FILES="$$(git clean -xdn \
 		-e $(VENV_DIR)/ \

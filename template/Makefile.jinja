@@ -53,6 +53,9 @@ $(VENV_DIR): pyproject.toml
 	$(VENV_PYTHON) -m mypy --install-types --non-interactive
 {%- endif %}
 
+copier-update: $(VENV_DIR)/bin/copier ## Update project files from the Copier template.
+	$(VENV_PYTHON) -m copier update
+
 clean: ## Remove untracked files (keeps the .venv folder and .env files).
 	@FILES="$$(git clean -xdn \
 		-e $(VENV_DIR)/ \
