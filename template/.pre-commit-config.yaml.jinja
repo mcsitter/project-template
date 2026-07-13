@@ -15,7 +15,7 @@ repos:
       - id: requirements-txt-fixer
       - id: check-ast
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.15.20
+    rev: v0.15.21
     hooks:
       - id: ruff-check
         args: [--fix]
@@ -28,7 +28,7 @@ repos:
           - "--option"
           - "array_auto_collapse=false"
   - repo: https://github.com/biomejs/pre-commit
-    rev: v2.5.2
+    rev: v2.5.3
     hooks:
       - id: biome-format
         args:
@@ -36,7 +36,7 @@ repos:
 
 {%- if typing %}
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v2.2.0
+    rev: v2.3.0
     hooks:
       - id: mypy
         args: [--ignore-missing-imports]
