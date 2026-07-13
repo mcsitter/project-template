@@ -30,7 +30,7 @@ venv: ## Create or update the virtual environment.
 	@$(MAKE) $(VENV_DIR)
 
 $(VENV_DIR)/bin/%: $(VENV_DIR)
-	@test -f $@ || $(MAKE) $(VENV_DIR)
+	@test -f $@ || $(MAKE) venv
 
 $(VENV_DIR): pyproject.toml
 	@if [ ! -x "$(VENV_PYTHON)" ]; then \
