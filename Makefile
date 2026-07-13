@@ -23,11 +23,12 @@ venv: ## Create or update the virtual environment.
 	@$(MAKE) $(VENV_DIR)
 
 $(VENV_DIR)/bin/%: $(VENV_DIR)
-	@test -f $@ || (rm -rf $(VENV_DIR) && $(MAKE) $(VENV_DIR))
+	@test -f $@ || $(MAKE) $(VENV_DIR)
 
 $(VENV_DIR): pyproject.toml
-	rm -rf $(VENV_DIR)
-	python -m venv $(VENV_DIR)
+	@if [ ! -x "$(VENV_PYTHON)" ]; then \
+		python -m venv $(VENV_DIR); \
+	fi
 	$(VENV_PIP) install --upgrade pip setuptools wheel
 	$(VENV_PIP) install -e .[dev]
 	$(VENV_PYTHON) -m prek install
