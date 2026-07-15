@@ -5,7 +5,8 @@
     "source=${localEnv:HOME}/.cache/pip,target=/home/vscode/.cache/pip,type=bind",
     "source=${localEnv:HOME}/.cache/{{ pre_commit_tool }},target=/home/vscode/.cache/{{ pre_commit_tool }},type=bind"
   ],
-  "postStartCommand": "rm -rf .venv && make git venv check",
+  "postCreateCommand": "sudo chown -R vscode:vscode /home/vscode/.cache",
+  "postStartCommand": "make git venv check",
   "customizations": {
     "vscode": {
       "extensions": [
