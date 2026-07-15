@@ -19,11 +19,13 @@ dev = [
 {%- endif %}
 ]
 
+{%- if project_name_snake_case != "project_template" %}
 [tool.setuptools]
 {%- if project_type == 'package' %}
 package-dir = { "" = "src" }
 {%- else %}
 package-dir = { "" = "." }
+{%- endif %}
 {%- endif %}
 
 [build-system]
