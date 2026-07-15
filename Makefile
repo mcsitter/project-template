@@ -22,7 +22,7 @@ venv: ## Create or update the virtual environment.
 	rm -rf $(VENV_DIR)
 	@$(MAKE) $(VENV_DIR)
 
-$(VENV_DIR)/bin/%: $(VENV_DIR)
+$(VENV_DIR)/bin/%:
 	@test -f $@ || $(MAKE) venv
 
 $(VENV_DIR): pyproject.toml
