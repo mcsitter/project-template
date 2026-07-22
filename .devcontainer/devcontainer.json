@@ -1,11 +1,12 @@
 {
   "name": "project_template",
   "image": "mcr.microsoft.com/devcontainers/python:3-3.12",
-  "remoteUser": "vscode",
+  "features": {},
   "mounts": [
     "source=${localEnv:HOME}/.cache/pip,target=/home/vscode/.cache/pip,type=bind",
     "source=${localEnv:HOME}/.cache/prek,target=/home/vscode/.cache/prek,type=bind"
   ],
+  "remoteUser": "vscode",
   "postCreateCommand": "sudo chown -R vscode:vscode /home/vscode/.cache",
   "postStartCommand": "make git venv check",
   "customizations": {
