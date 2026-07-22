@@ -1,6 +1,7 @@
 {
   "name": "{{ project_name_kebab_case }}",
   "image": "mcr.microsoft.com/devcontainers/python:3-{{ python_version }}",
+  "remoteUser": "vscode",
   "mounts": [
     "source=${localEnv:HOME}/.cache/pip,target=/home/vscode/.cache/pip,type=bind",
     "source=${localEnv:HOME}/.cache/{{ pre_commit_tool }},target=/home/vscode/.cache/{{ pre_commit_tool }},type=bind"
@@ -25,10 +26,10 @@
           "source.organizeImports": "explicit"
         },
         "editor.formatOnSave": true,
+        "python.defaultInterpreterPath": "${containerWorkspaceFolder}/.venv/bin/python",
         "[python]": {
           "editor.defaultFormatter": "charliermarsh.ruff"
-        },
-        "python.terminal.activateEnvironment": true
+        }
       }
     }
   }
