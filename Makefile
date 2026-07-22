@@ -47,7 +47,7 @@ clean: clean-generated
 	@FILES="$$(git clean -xdn \
 		-e $(VENV_DIR)/ \
 		-e '*.py' \
-		-e .env )"; \
+		-e .env* )"; \
 	if [ -z "$$FILES" ]; then \
 		echo "Nothing else to clean."; \
 	else \
@@ -57,7 +57,7 @@ clean: clean-generated
 			git clean -xd -f \
 				-e $(VENV_DIR)/ \
 				-e '*.py' \
-				-e .env ; \
+				-e .env* ; \
 		fi \
 	fi
 
