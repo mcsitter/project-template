@@ -231,4 +231,5 @@ pyrightconfig.json
 # End of https://www.toptal.com/developers/gitignore/api/data,git,jupyternotebooks,python,visualstudiocode
 requirements.txt
 .copier-answers.yml
-src
+/src
+uv.lock

@@ -1,11 +1,9 @@
 .DEFAULT_GOAL := help
 MAKEFLAGS += --no-print-directory
-.PHONY: check clean clean-generated clean-venv git help init test-template update-from-template update-pre-commit-hooks venv
+.PHONY: check clean clean-generated clean-venv git help init sync test-template update-from-template update-pre-commit-hooks
 
+UV ?= uv
 VENV_DIR := .venv
-PYTHON ?= python
-VENV_PYTHON := $(VENV_DIR)/bin/python
-VENV_PIP := $(VENV_DIR)/bin/python -m pip
 
 ## Show available commands.
 help:
@@ -16,12 +14,11 @@ help:
 	@awk '/^## / {desc=$$0; sub(/^## /,"",desc)} /^[a-zA-Z_-]+:/ {target=$$1; sub(/:$$/,"",target); printf "  %-28s %s\n", target, desc; desc=""}' $(MAKEFILE_LIST) | sort
 	@echo ""
 
-## Recreate the virtual environment from scratch.
-venv:
-	@if [ -d "$(VENV_DIR)" ]; then \
-		rm -rf "$(VENV_DIR)"; \
-	fi
-	@$(MAKE) $(VENV_DIR)
+## Synchronize dependencies and install development tools.
+sync: pyproject.toml
+	$(UV) sync --extra dev
+	$(UV) run prek install
+	$(UV) run prek install --hook-type commit-msg commitizen
 
 ## Remove the virtual environment.
 clean-venv:
@@ -31,34 +28,21 @@ clean-venv:
 		echo "Virtual environment does not exist."; \
 	fi
 
-$(VENV_DIR)/bin/%:
-	@test -f $@ || $(MAKE) venv
-
-$(VENV_DIR): pyproject.toml
-	@if [ ! -x "$(VENV_PYTHON)" ]; then \
-		$(PYTHON) -m venv $(VENV_DIR); \
-	fi
-	$(VENV_PIP) install --upgrade pip
-	$(VENV_PIP) install -e .[dev]
-	$(VENV_PYTHON) -m prek install
-	$(VENV_PYTHON) -m prek install --hook-type commit-msg commitizen
-	touch $@
-
 ## Run code quality checks.
-check: $(VENV_DIR)/bin/prek
-	$(VENV_PYTHON) -m prek run --all-files
+check:
+	$(UV) run prek run --all-files
 
 ## Update project files from the template.
-update-from-template: $(VENV_DIR)/bin/copier
-	$(VENV_PYTHON) -m copier update
+update-from-template:
+	$(UV) run copier update
 
 ## Update pre-commit hook versions and commit changes.
-update-pre-commit-hooks: $(VENV_DIR)/bin/prek
+update-pre-commit-hooks:
 	@if ! git diff --quiet || ! git diff --cached --quiet; then \
 		echo "Git tree is not clean. Commit or stash changes first."; \
 		exit 1; \
 	fi
-	$(VENV_PYTHON) -m prek autoupdate
+	$(UV) run prek autoupdate
 	@if git diff --quiet -- .pre-commit-config.yaml; then \
 		echo "No pre-commit updates available."; \
 		exit 0; \
@@ -115,10 +99,10 @@ git:
 init:
 	@$(MAKE) git
 	@$(MAKE) clean
-	@$(MAKE) venv
+	@$(MAKE) sync
 	@$(MAKE) check
 
 ## Test the Copier template by applying it to itself.
-test-template: $(VENV_DIR)/bin/copier
-	$(VENV_PYTHON) scripts/update_precommit_template.py || true
-	$(VENV_PYTHON) -m copier copy --defaults --overwrite --vcs-ref=HEAD . .
+test-template:
+	$(UV) run python scripts/update_precommit_template.py || true
+	$(UV) run copier copy --defaults --overwrite --vcs-ref=HEAD . .

@@ -2,10 +2,15 @@
 name = "{{ project_name_kebab_case }}"
 version = "0.1.0"
 description = "{{ project_description }}"
-{%- if project_type == "package" %}
 requires-python = ">={{ python_version }}"
-{%- endif %}
 dependencies = []
+
+{%- if project_type == "app" %}
+
+[project.scripts]
+{{ project_name_snake_case }} = "{{ project_name_snake_case }}.main:main"
+
+{%- endif %}
 
 [project.optional-dependencies]
 dev = [
@@ -22,11 +27,11 @@ dev = [
 {%- if project_name_snake_case != "project_template" %}
 
 [tool.setuptools]
-{%- if project_type == 'package' %}
 package-dir = { "" = "src" }
-{%- else %}
-package-dir = { "" = "." }
-{%- endif %}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
 {%- endif %}
 
 [build-system]
@@ -56,6 +61,7 @@ ignore = [
 [tool.mypy]
 ignore_missing_imports = true
 {%- endif %}
+
 {%- if with_conventional_commits %}
 
 [tool.commitizen]

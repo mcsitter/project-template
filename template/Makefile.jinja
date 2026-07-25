@@ -1,6 +1,7 @@
 .DEFAULT_GOAL := help
 MAKEFLAGS += --no-print-directory
-{%- set phony_targets = ["check", "clean", "clean-generated", "clean-venv", "git", "help", "init", "venv", "update-from-template", "update-pre-commit-hooks"] %}
+
+{%- set phony_targets = ["check", "clean", "clean-generated", "clean-venv", "git", "help", "init", "sync", "update-from-template", "update-pre-commit-hooks"] %}
 {%- if project_name_snake_case == "project_template" %}
 {%- set phony_targets = phony_targets + ["test-template"] %}
 {%- endif %}
@@ -9,10 +10,8 @@ MAKEFLAGS += --no-print-directory
 {%- endif %}
 .PHONY: {{ phony_targets | sort | join(" ") }}
 
+UV ?= uv
 VENV_DIR := .venv
-PYTHON ?= python
-VENV_PYTHON := $(VENV_DIR)/bin/python
-VENV_PIP := $(VENV_DIR)/bin/python -m pip
 
 ## Show available commands.
 help:
@@ -23,12 +22,16 @@ help:
 	@awk '/^## / {desc=$$0; sub(/^## /,"",desc)} /^[a-zA-Z_-]+:/ {target=$$1; sub(/:$$/,"",target); printf "  %-28s %s\n", target, desc; desc=""}' $(MAKEFILE_LIST) | sort
 	@echo ""
 
-## Recreate the virtual environment from scratch.
-venv:
-	@if [ -d "$(VENV_DIR)" ]; then \
-		rm -rf "$(VENV_DIR)"; \
-	fi
-	@$(MAKE) $(VENV_DIR)
+## Synchronize dependencies and install development tools.
+sync: pyproject.toml
+	$(UV) sync --extra dev
+	$(UV) run {{ pre_commit_tool }} install
+{%- if with_conventional_commits %}
+	$(UV) run {{ pre_commit_tool }} install --hook-type commit-msg commitizen
+{%- endif %}
+{%- if typing %}
+	$(UV) run mypy --install-types --non-interactive
+{%- endif %}
 
 ## Remove the virtual environment.
 clean-venv:
@@ -38,45 +41,21 @@ clean-venv:
 		echo "Virtual environment does not exist."; \
 	fi
 
-$(VENV_DIR)/bin/%:
-	@test -f $@ || $(MAKE) venv
-
-$(VENV_DIR): pyproject.toml
-	@if [ ! -x "$(VENV_PYTHON)" ]; then \
-		$(PYTHON) -m venv $(VENV_DIR); \
-	fi
-	$(VENV_PIP) install --upgrade pip
-{%- if project_type == "app" %}
-	$(VENV_PIP) install .
-	$(VENV_PIP) freeze --exclude {{ project_name_snake_case }} > requirements.txt
-	$(VENV_PIP) install .[dev]
-{%- else %}
-	$(VENV_PIP) install -e .[dev]
-{%- endif %}
-	$(VENV_PYTHON) -m {{ pre_commit_tool }} install
-{%- if with_conventional_commits %}
-	$(VENV_PYTHON) -m {{ pre_commit_tool }} install --hook-type commit-msg commitizen
-{%- endif %}
-{%- if typing %}
-	$(VENV_PYTHON) -m mypy --install-types --non-interactive
-{%- endif %}
-	touch $@
-
 ## Run code quality checks.
-check: $(VENV_DIR)/bin/{{ pre_commit_tool }}
-	$(VENV_PYTHON) -m {{ pre_commit_tool }} run --all-files
+check:
+	$(UV) run {{ pre_commit_tool }} run --all-files
 
 ## Update project files from the template.
-update-from-template: $(VENV_DIR)/bin/copier
-	$(VENV_PYTHON) -m copier update
+update-from-template:
+	$(UV) run copier update
 
 ## Update pre-commit hook versions and commit changes.
-update-pre-commit-hooks: $(VENV_DIR)/bin/{{ pre_commit_tool }}
+update-pre-commit-hooks:
 	@if ! git diff --quiet || ! git diff --cached --quiet; then \
 		echo "Git tree is not clean. Commit or stash changes first."; \
 		exit 1; \
 	fi
-	$(VENV_PYTHON) -m {{ pre_commit_tool }} autoupdate
+	$(UV) run {{ pre_commit_tool }} autoupdate
 	@if git diff --quiet -- .pre-commit-config.yaml; then \
 		echo "No pre-commit updates available."; \
 		exit 0; \
@@ -133,19 +112,20 @@ git:
 init:
 	@$(MAKE) git
 	@$(MAKE) clean
-	@$(MAKE) venv
+	@$(MAKE) sync
 	@$(MAKE) check
 
 {%- if project_name_snake_case == "project_template" %}
 
 ## Test the Copier template by applying it to itself.
-test-template: $(VENV_DIR)/bin/copier
-	$(VENV_PYTHON) scripts/update_precommit_template.py || true
-	$(VENV_PYTHON) -m copier copy --defaults --overwrite --vcs-ref=HEAD . .
+test-template:
+	$(UV) run python scripts/update_precommit_template.py || true
+	$(UV) run copier copy --defaults --overwrite --vcs-ref=HEAD . .
 {%- endif %}
+
 {%- if project_type == "app" %}
 
 ## Run the {{ project_name }} app.
-run: $(VENV_PYTHON)
-	$(VENV_PYTHON) main.py
+run:
+	$(UV) run {{ project_name_snake_case }}
 {%- endif %}
