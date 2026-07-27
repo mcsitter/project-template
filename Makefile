@@ -16,7 +16,7 @@ help:
 
 ## Synchronize dependencies and install development tools.
 sync: pyproject.toml
-	$(UV) sync --extra dev
+	$(UV) sync --group dev
 	$(UV) run prek install
 	$(UV) run prek install --hook-type commit-msg commitizen
 

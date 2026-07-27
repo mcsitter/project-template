@@ -5,15 +5,10 @@ description = "{{ project_description }}"
 requires-python = ">={{ python_version }}"
 dependencies = []
 
-{%- if project_type == "app" %}
-
-[project.scripts]
-{{ project_name_snake_case }} = "{{ project_name_snake_case }}.main:main"
-
-{%- endif %}
-
-[project.optional-dependencies]
+[dependency-groups]
+types = []
 dev = [
+  { include-group = "types" },
   "copier",
 {%- if typing %}
   "mypy",
@@ -23,7 +18,12 @@ dev = [
   "python-dotenv",
 {%- endif %}
 ]
+{%- if project_type == "app" %}
 
+[project.scripts]
+{{ project_name_snake_case }} = "{{ project_name_snake_case }}.main:main"
+
+{%- endif %}
 {%- if project_name_snake_case != "project_template" %}
 
 [tool.setuptools]

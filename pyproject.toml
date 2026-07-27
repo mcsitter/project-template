@@ -5,8 +5,10 @@ description = "A Python package that does things."
 requires-python = ">=3.12"
 dependencies = []
 
-[project.optional-dependencies]
+[dependency-groups]
+types = []
 dev = [
+  { include-group = "types" },
   "copier",
   "prek",
 ]

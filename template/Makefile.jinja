@@ -24,13 +24,10 @@ help:
 
 ## Synchronize dependencies and install development tools.
 sync: pyproject.toml
-	$(UV) sync --extra dev
+	$(UV) sync --group dev
 	$(UV) run {{ pre_commit_tool }} install
 {%- if with_conventional_commits %}
 	$(UV) run {{ pre_commit_tool }} install --hook-type commit-msg commitizen
-{%- endif %}
-{%- if typing %}
-	$(UV) run mypy --install-types --non-interactive
 {%- endif %}
 
 ## Remove the virtual environment.
