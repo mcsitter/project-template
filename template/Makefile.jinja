@@ -92,8 +92,12 @@ clean: clean-generated
 clean-generated:
 	@find . -type d -name "*.egg-info" -prune -exec rm -rf {} +
 	@find . -type d -name "__pycache__" -prune -exec rm -rf {} +
+	@find . -type d -name ".import_linter_cache" -prune -exec rm -rf {} +
 	@rm -rf \
+		build \
+		dist \
 		.mypy_cache \
+		.pytest_cache \
 		.ruff_cache
 
 ## Initialize a Git repository.
