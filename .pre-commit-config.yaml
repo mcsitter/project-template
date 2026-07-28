@@ -43,6 +43,7 @@ repos:
       - id: biome-format
         args:
           - "--indent-style=space"
+
   - repo: https://github.com/commitizen-tools/commitizen
     rev: v4.16.5
     hooks:
