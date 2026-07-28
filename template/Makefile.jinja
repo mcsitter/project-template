@@ -26,9 +26,6 @@ help:
 sync: pyproject.toml
 	$(UV) sync --group dev
 	$(UV) run {{ pre_commit_tool }} install
-{%- if with_conventional_commits %}
-	$(UV) run {{ pre_commit_tool }} install --hook-type commit-msg commitizen
-{%- endif %}
 
 ## Remove the virtual environment.
 clean-venv:

@@ -18,7 +18,6 @@ help:
 sync: pyproject.toml
 	$(UV) sync --group dev
 	$(UV) run prek install
-	$(UV) run prek install --hook-type commit-msg commitizen
 
 ## Remove the virtual environment.
 clean-venv:
