@@ -42,8 +42,8 @@ build-backend = "setuptools.build_meta"
 line-length = 88
 {%- if project_name_snake_case == "project_template" %}
 extend-exclude = [
-  "*{{ '{{' }}*{{ '}}' }}*",
-  "*{{ '{%' }}*{{ '%}' }}*",
+  '*\{\{*\}\}*',
+  '*\{\%*\%\}*',
 ]
 {%- endif %}
 
