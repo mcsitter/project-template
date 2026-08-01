@@ -5,6 +5,9 @@
     "source.organizeImports": "explicit"
   },
   "editor.formatOnSave": true,
+  "editor.rulers": [88],
+  "files.insertFinalNewline": true,
+  "files.trimTrailingWhitespace": true,
   "notebook.formatOnSave.enabled": true,
   "notebook.codeActionsOnSave": {
     "notebook.source.fixAll": "explicit",
