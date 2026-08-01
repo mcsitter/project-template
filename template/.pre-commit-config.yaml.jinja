@@ -25,7 +25,7 @@ repos:
       - id: check-ast
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.16.0
+    rev: v0.16.1
     hooks:
       - id: ruff-check
         args: [--fix]
@@ -40,7 +40,7 @@ repos:
           - "array_auto_collapse=false"
 
   - repo: https://github.com/biomejs/pre-commit
-    rev: v2.5.5
+    rev: v2.5.6
     hooks:
       - id: biome-format
         args:
@@ -57,7 +57,7 @@ repos:
 {%- if with_conventional_commits %}
 
   - repo: https://github.com/commitizen-tools/commitizen
-    rev: v4.16.5
+    rev: v4.17.0
     hooks:
       - id: commitizen
         stages: [commit-msg]
