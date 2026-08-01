@@ -60,22 +60,24 @@ check:
 update-from-template:
 	$(UV) run copier update
 
-## Update pre-commit hook versions and commit changes.
+## Update pre-commit hook versions, validate, and commit changes.
 update-pre-commit-hooks:
 	@if ! git diff --quiet || ! git diff --cached --quiet; then \
 		echo "Git tree is not clean. Commit or stash changes first."; \
 		exit 1; \
-	fi
-	$(UV) run {{ pre_commit_tool }} autoupdate
-	@if git diff --quiet -- .pre-commit-config.yaml; then \
+	fi; \
+	$(UV) run {{ pre_commit_tool }} autoupdate; \
+	if git diff --quiet -- .pre-commit-config.yaml; then \
 		echo "No pre-commit updates available."; \
 		exit 0; \
-	fi
-	@echo ""
-	@echo "Changes:"
-	@git diff -- .pre-commit-config.yaml
-	@echo ""
-	@read -p "Commit these changes? [y/N] " ANSWER; \
+	fi; \
+	echo ""; \
+	echo "Changes:"; \
+	git diff -- .pre-commit-config.yaml; \
+	echo ""; \
+	echo "Running checks..."; \
+	$(MAKE) check; \
+	read -p "Commit these changes? [y/N] " ANSWER; \
 	if [ "$$ANSWER" = "y" ] || [ "$$ANSWER" = "Y" ]; then \
 		git add .pre-commit-config.yaml && \
 		git commit -m "chore: update pre-commit hooks"; \
