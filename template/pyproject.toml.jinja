@@ -21,8 +21,7 @@ dev = [
 {%- if project_type == "app" %}
 
 [project.scripts]
-{{ project_name_snake_case }} = "{{ project_name_snake_case }}.main:main"
-
+{{ project_name_kebab_case }} = "{{ project_name_snake_case }}.main:main"
 {%- endif %}
 {%- if project_name_snake_case != "project_template" %}
 

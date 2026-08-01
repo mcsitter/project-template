@@ -23,17 +23,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
         with:
-          path: project_template
+          path: project-template
 
       - name: Set up uv
         uses: astral-sh/setup-uv@v7
 
       - name: Scaffold Python project
         run: |
-          uvx copier copy --vcs-ref=HEAD project_template my-project \
+          uvx copier copy --vcs-ref=HEAD project-template my-project \
             --defaults \
             --data project_type="${{ matrix.project-type }}" \
-            --data project_name="project_template" \
+            --data project_name="Project Template" \
             --data project_description="A Python ${{ matrix.project-type }} that does things." \
             --data pre_commit_tool="${{ matrix.pre-commit-tool }}" \
             --data with_conventional_commits="${{ matrix.with-conventional-commits }}" \

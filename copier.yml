@@ -4,7 +4,7 @@ _subdirectory: template
 project_name:
   type: str
   help: What is your {{ project_type }}'s name?
-  default: project_template
+  default: Project Template
   placeholder: "{% if project_type == 'app' %}My App{% else %}My Package{% endif %}"
   validator: >-
     {% if not project_name.strip() %}
