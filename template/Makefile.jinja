@@ -65,21 +65,36 @@ update-pre-commit-hooks:
 	@if ! git diff --quiet || ! git diff --cached --quiet; then \
 		echo "Git tree is not clean. Commit or stash changes first."; \
 		exit 1; \
-	fi; \
+		fi; \
+{%- if project_name_snake_case == "project_template" %}
+	$(UV) run python scripts/update_precommit_template.py || true; \
+{%- endif %}
 	$(UV) run {{ pre_commit_tool }} autoupdate; \
+{%- if project_name_snake_case == "project_template" %}
+	if git diff --quiet -- .pre-commit-config.yaml template/.pre-commit-config.yaml.jinja; then \
+{%- else %}
 	if git diff --quiet -- .pre-commit-config.yaml; then \
+{%- endif %}
 		echo "No pre-commit updates available."; \
 		exit 0; \
 	fi; \
 	echo ""; \
 	echo "Changes:"; \
+{%- if project_name_snake_case == "project_template" %}
+	git diff -- .pre-commit-config.yaml template/.pre-commit-config.yaml.jinja; \
+{%- else %}
 	git diff -- .pre-commit-config.yaml; \
+{%- endif %}
 	echo ""; \
 	echo "Running checks..."; \
 	$(MAKE) check; \
 	read -p "Commit these changes? [y/N] " ANSWER; \
 	if [ "$$ANSWER" = "y" ] || [ "$$ANSWER" = "Y" ]; then \
+{%- if project_name_snake_case == "project_template" %}
+		git add .pre-commit-config.yaml template/.pre-commit-config.yaml.jinja && \
+{%- else %}
 		git add .pre-commit-config.yaml && \
+{%- endif %}
 		git commit -m "chore: update pre-commit hooks"; \
 	else \
 		echo "Aborted."; \
@@ -189,7 +204,6 @@ init:
 
 ## Test the Copier template by applying it to itself.
 test-template:
-	$(UV) run python scripts/update_precommit_template.py || true
 	$(UV) run copier copy --defaults --overwrite --vcs-ref=HEAD . .
 {%- endif %}
 

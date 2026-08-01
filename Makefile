@@ -54,21 +54,22 @@ update-pre-commit-hooks:
 	@if ! git diff --quiet || ! git diff --cached --quiet; then \
 		echo "Git tree is not clean. Commit or stash changes first."; \
 		exit 1; \
-	fi; \
+		fi; \
+	$(UV) run python scripts/update_precommit_template.py || true; \
 	$(UV) run prek autoupdate; \
-	if git diff --quiet -- .pre-commit-config.yaml; then \
+	if git diff --quiet -- .pre-commit-config.yaml template/.pre-commit-config.yaml.jinja; then \
 		echo "No pre-commit updates available."; \
 		exit 0; \
 	fi; \
 	echo ""; \
 	echo "Changes:"; \
-	git diff -- .pre-commit-config.yaml; \
+	git diff -- .pre-commit-config.yaml template/.pre-commit-config.yaml.jinja; \
 	echo ""; \
 	echo "Running checks..."; \
 	$(MAKE) check; \
 	read -p "Commit these changes? [y/N] " ANSWER; \
 	if [ "$$ANSWER" = "y" ] || [ "$$ANSWER" = "Y" ]; then \
-		git add .pre-commit-config.yaml && \
+		git add .pre-commit-config.yaml template/.pre-commit-config.yaml.jinja && \
 		git commit -m "chore: update pre-commit hooks"; \
 	else \
 		echo "Aborted."; \
@@ -176,5 +177,4 @@ init:
 
 ## Test the Copier template by applying it to itself.
 test-template:
-	$(UV) run python scripts/update_precommit_template.py || true
 	$(UV) run copier copy --defaults --overwrite --vcs-ref=HEAD . .
