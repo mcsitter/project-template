@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := help
 MAKEFLAGS += --no-print-directory
-.PHONY: check clean clean-generated clean-venv git help init sync test-template update-from-template update-pre-commit-hooks
+.PHONY: check clean clean-generated clean-venv git help init sync test-template update-from-template update-github update-pre-commit-hooks
 
 UV ?= uv
 VENV_DIR := .venv
@@ -8,9 +8,21 @@ VENV_DIR := .venv
 ## Show available commands.
 help:
 	@echo ""
-	@echo "Usage: make <target>"
+	@echo "project_template"
 	@echo ""
-	@echo "Available targets:"
+	@echo "Usage:"
+	@echo "  make <target>"
+	@echo ""
+	@echo "Typical workflow:"
+	@echo "  make init                     Set up the project and development environment"
+	@echo "  make check                    Format and run quality checks"
+	@echo ""
+	@echo "Maintenance:"
+	@echo "  make update-from-template     Update files from the project template"
+	@echo "  make update-github            Update GitHub repository metadata"
+	@echo "  make update-pre-commit-hooks  Update pre-commit hook versions"
+	@echo ""
+	@echo "All targets:"
 	@awk '/^## / {desc=$$0; sub(/^## /,"",desc)} /^[a-zA-Z_-]+:/ {target=$$1; sub(/:$$/,"",target); printf "  %-28s %s\n", target, desc; desc=""}' $(MAKEFILE_LIST) | sort
 	@echo ""
 
@@ -29,6 +41,8 @@ clean-venv:
 
 ## Run code quality checks.
 check:
+	@echo "Formatting with ruff..."
+	@$(UV) run prek run ruff-format --all-files >/dev/null
 	$(UV) run prek run --all-files
 
 ## Update project files from the template.
@@ -98,12 +112,65 @@ git:
 		git init -b main; \
 	fi
 
-## Clean, install dependencies, and run checks.
+## Update GitHub repository metadata from project configuration.
+update-github:
+	@if command -v gh >/dev/null 2>&1; then \
+		if ! gh auth status >/dev/null 2>&1; then \
+			echo "GitHub CLI is not authenticated; skipping GitHub update."; \
+		elif [ ! -f .copier-answers.yml ]; then \
+			echo ".copier-answers.yml not found; skipping GitHub update."; \
+		else \
+			name="$$(awk '/^project_name:/ {sub(/^project_name: /, ""); print}' .copier-answers.yml | tr '[:upper:]' '[:lower:]' | tr ' _' '--')"; \
+			owner="$$(gh api user --jq '.login')"; \
+			repo="$$owner/$$name"; \
+			description="$$(awk '/^project_description:/ {sub(/^project_description:/, ""); print}' .copier-answers.yml)"; \
+			if gh repo view "$$repo" >/dev/null 2>&1; then \
+				echo "Updating GitHub repository metadata..."; \
+				gh repo edit "$$repo" \
+					--description "$$description"; \
+			else \
+				echo "Creating GitHub repository..."; \
+				gh repo create "$$repo" \
+					--private \
+					--description "$$description" \
+					--source . \
+					--remote origin; \
+			fi; \
+		fi; \
+	else \
+		echo "GitHub CLI (gh) not available; skipping GitHub update."; \
+	fi
+
+## Initialize the project, install dependencies, run checks, and create the initial commit.
 init:
 	@$(MAKE) git
 	@$(MAKE) clean
 	@$(MAKE) sync
 	@$(MAKE) check
+	@$(MAKE) update-github
+	@INITIAL_COMMIT=0; \
+	if ! git rev-parse --verify HEAD >/dev/null 2>&1; then \
+		git add -A; \
+		if git diff --cached --quiet; then \
+			echo "Nothing to commit."; \
+		else \
+			echo ""; \
+			echo "Initial commit:"; \
+			git diff --cached --stat; \
+			echo ""; \
+			read -p "Commit initial project? [y/N] " ANSWER; \
+			if [ "$$ANSWER" = "y" ] || [ "$$ANSWER" = "Y" ]; then \
+				git commit -m "chore: initialize project"; \
+				INITIAL_COMMIT=1; \
+			else \
+				echo "Initial commit skipped."; \
+			fi; \
+		fi; \
+	fi; \
+	if [ "$$INITIAL_COMMIT" = "1" ] && git remote get-url origin >/dev/null 2>&1; then \
+		echo "Pushing initial commit..."; \
+		git push -u origin "$$(git branch --show-current)"; \
+	fi
 
 ## Test the Copier template by applying it to itself.
 test-template:
