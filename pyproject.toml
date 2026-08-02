@@ -40,6 +40,9 @@ ignore = [
   "T201",
 ]
 
+[tool.ruff.lint.flake8-type-checking]
+runtime-evaluated-base-classes = ["pydantic.BaseModel"]
+
 [tool.commitizen]
 name = "cz_conventional_commits"
 tag_format = "$version"
