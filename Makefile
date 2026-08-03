@@ -147,7 +147,6 @@ update-github:
 ## Initialize the project, install dependencies, run checks, and create the initial commit.
 init:
 	@$(MAKE) git
-	@$(MAKE) clean
 	@$(MAKE) sync
 	@$(MAKE) check
 	@$(MAKE) update-github
