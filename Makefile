@@ -43,6 +43,7 @@ clean-venv:
 check:
 	@echo "Formatting with ruff..."
 	@$(UV) run prek run ruff-format --all-files >/dev/null || echo "ruff-format updated files"
+	$(UV) run python scripts/add_ruff_rule_links.py
 	$(UV) run prek run --all-files
 
 ## Update project files from the template.

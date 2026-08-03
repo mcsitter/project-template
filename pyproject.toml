@@ -27,17 +27,17 @@ extend-exclude = [
 [tool.ruff.lint]
 select = ["ALL"]
 ignore = [
-  "COM812",
-  "CPY001",
-  "D203",
-  "D213",
-  "S311",
+  "COM812", # https://docs.astral.sh/ruff/rules/missing-trailing-comma/
+  "CPY001", # https://docs.astral.sh/ruff/rules/missing-copyright-notice/
+  "D203",   # https://docs.astral.sh/ruff/rules/incorrect-blank-line-before-class/
+  "D213",   # https://docs.astral.sh/ruff/rules/multi-line-summary-second-line/
+  "S311",   # https://docs.astral.sh/ruff/rules/suspicious-non-cryptographic-random-usage/
 ]
 
 [tool.ruff.lint.per-file-ignores]
 "scripts/*.py" = [
-  "INP001",
-  "T201",
+  "INP001", # https://docs.astral.sh/ruff/rules/implicit-namespace-package/
+  "T201",   # https://docs.astral.sh/ruff/rules/print/
 ]
 
 [tool.ruff.lint.flake8-type-checking]

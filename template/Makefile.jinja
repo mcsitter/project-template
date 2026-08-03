@@ -54,6 +54,9 @@ clean-venv:
 check:
 	@echo "Formatting with ruff..."
 	@$(UV) run prek run ruff-format --all-files >/dev/null || echo "ruff-format updated files"
+{%- if project_name_snake_case == "project_template" %}
+	$(UV) run python scripts/add_ruff_rule_links.py
+{%- endif %}
 	$(UV) run {{ pre_commit_tool }} run --all-files
 
 ## Update project files from the template.
