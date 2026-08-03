@@ -42,7 +42,7 @@ clean-venv:
 ## Run code quality checks.
 check:
 	@echo "Formatting with ruff..."
-	@$(UV) run prek run ruff-format --all-files >/dev/null
+	@$(UV) run prek run ruff-format --all-files >/dev/null || echo "ruff-format updated files"
 	$(UV) run prek run --all-files
 
 ## Update project files from the template.
