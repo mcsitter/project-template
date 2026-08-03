@@ -8,7 +8,7 @@
   ],
   "remoteUser": "vscode",
   "postCreateCommand": "sudo chown -R vscode:vscode /home/vscode/.cache",
-  "postStartCommand": "make git sync check",
+  "postStartCommand": "make sync",
   "customizations": {
     "vscode": {
       "extensions": [
