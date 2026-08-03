@@ -61,7 +61,20 @@ check:
 
 ## Update project files from the template.
 update-from-template:
-	$(UV) run copier update
+	@if ! git diff --quiet || ! git diff --cached --quiet; then \
+		echo "Git tree is not clean. Commit or stash changes first."; \
+		exit 1; \
+	fi
+	$(UV) run copier update --defaults
+	@if ! git diff --quiet; then \
+		git diff --check; \
+		if [ $$? -eq 0 ]; then \
+			git add -A && git commit -m "chore: update from template"; \
+		else \
+			echo "Diff contains conflicts."; \
+			exit 1; \
+		fi; \
+	fi
 
 ## Update pre-commit hook versions, validate, and commit changes.
 update-pre-commit-hooks:
