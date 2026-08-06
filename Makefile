@@ -187,7 +187,41 @@ init:
 		echo "Pushing initial commit..."; \
 		git push -u origin "$$(git branch --show-current)"; \
 	fi
+	$(MAKE) vscode-extensions
 
 ## Test the Copier template by applying it to itself.
 test-template:
 	$(UV) run copier copy --defaults --overwrite --vcs-ref=HEAD . .
+
+## Install missing VS Code extensions.
+vscode-extensions:
+	@if [ "$${TERM_PROGRAM:-}" = "vscode" ]; then \
+		installed="$$(code --list-extensions)"; \
+		missing="$$(jq -r '.recommendations[]' .vscode/extensions.json | while read -r extension; do \
+			if ! printf '%s\n' "$$installed" | grep -ixq "$$extension"; then \
+				echo "$$extension"; \
+			fi; \
+		done)"; \
+		if [ -z "$$missing" ]; then \
+			echo "All recommended VS Code extensions are already installed"; \
+			exit 0; \
+		fi; \
+		echo "Missing VS Code extensions:"; \
+		printf '%s\n' "$$missing"; \
+		if [ -t 0 ]; then \
+			printf "Install missing extensions? [y/N] "; \
+			read -r answer; \
+			case "$$answer" in \
+				y|Y|yes|YES) ;; \
+				*) echo "Skipping VS Code extensions"; exit 0 ;; \
+			esac; \
+		else \
+			echo "Running non-interactively, installing extensions"; \
+		fi; \
+		printf '%s\n' "$$missing" | while read -r extension; do \
+			echo "Installing VS Code extension: $$extension"; \
+			code --install-extension "$$extension"; \
+		done; \
+	else \
+		echo "Not running inside VS Code, skipping extensions"; \
+	fi

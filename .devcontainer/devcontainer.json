@@ -13,11 +13,9 @@
   "customizations": {
     "vscode": {
       "extensions": [
-        "biomejs.biome",
         "charliermarsh.ruff",
-        "GitHub.copilot-chat",
         "ms-azuretools.vscode-docker",
-        "ms-python.python",
+        "redhat.vscode-yaml",
         "tamasfe.even-better-toml"
       ]
     }
