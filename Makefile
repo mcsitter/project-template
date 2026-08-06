@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := help
 MAKEFLAGS += --no-print-directory
-.PHONY: check clean clean-generated clean-venv git help init sync test-template update-from-template update-github update-pre-commit-hooks
+.PHONY: check clean clean-generated clean-venv git help init sync test-template update-from-template update-github update-pre-commit-hooks vscode-extensions
 
 UV ?= uv
 VENV_DIR := .venv
@@ -44,6 +44,7 @@ check:
 	@echo "Formatting with ruff..."
 	@$(UV) run prek run ruff-format --all-files >/dev/null || echo "ruff-format updated files"
 	$(UV) run python scripts/add_ruff_rule_links.py
+	$(UV) run python scripts/lint_makefile.py
 	$(UV) run prek run --all-files
 
 ## Update project files from the template.
