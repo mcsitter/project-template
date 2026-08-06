@@ -72,7 +72,8 @@ update-from-template:
 		if [ $$? -eq 0 ]; then \
 			git add -A && git commit -m "chore: update from template"; \
 		else \
-			echo "Diff contains conflicts."; \
+			echo "Resolve merge conflicts, then commit with:"; \
+			echo "  git add -A && git commit -m \"chore: update from template\""; \
 			exit 1; \
 		fi; \
 	fi

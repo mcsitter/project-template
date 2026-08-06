@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := help
 MAKEFLAGS += --no-print-directory
-.PHONY: check clean clean-generated clean-venv git help init sync test-template update-from-template update-github update-pre-commit-hooks vscode-extensions
+.PHONY: check clean clean-generated clean-venv git help init run sync test-template test-template update-from-template update-github update-pre-commit-hooks vscode-extensions
 
 UV ?= uv
 VENV_DIR := .venv
@@ -59,7 +59,8 @@ update-from-template:
 		if [ $$? -eq 0 ]; then \
 			git add -A && git commit -m "chore: update from template"; \
 		else \
-			echo "Diff contains conflicts."; \
+			echo "Resolve merge conflicts, then commit with:"; \
+			echo "  git add -A && git commit -m \"chore: update from template\""; \
 			exit 1; \
 		fi; \
 	fi
