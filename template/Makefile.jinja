@@ -83,7 +83,7 @@ update-pre-commit-hooks:
 	@if ! git diff --quiet || ! git diff --cached --quiet; then \
 		echo "Git tree is not clean. Commit or stash changes first."; \
 		exit 1; \
-		fi; \
+	fi; \
 {%- if project_name_snake_case == "project_template" %}
 	$(UV) run python scripts/update_precommit_template.py || true; \
 {%- endif %}
@@ -99,14 +99,23 @@ update-pre-commit-hooks:
 	echo ""; \
 	echo "Changes:"; \
 {%- if project_name_snake_case == "project_template" %}
-	git diff -- .pre-commit-config.yaml template/.pre-commit-config.yaml.jinja; \
+	git --no-pager diff --unified=0 -- .pre-commit-config.yaml template/.pre-commit-config.yaml.jinja; \
 {%- else %}
-	git diff -- .pre-commit-config.yaml; \
+	git --no-pager diff --unified=0 -- .pre-commit-config.yaml; \
 {%- endif %}
 	echo ""; \
 	echo "Running checks..."; \
-	$(MAKE) check; \
-	read -p "Commit these changes? [y/N] " ANSWER; \
+	CHECK_LOG=$$(mktemp); \
+	if ! $(MAKE) check >"$$CHECK_LOG" 2>&1; then \
+		echo "Checks failed:"; \
+		cat "$$CHECK_LOG"; \
+		rm -f "$$CHECK_LOG"; \
+		exit 1; \
+	fi; \
+	rm -f "$$CHECK_LOG"; \
+	echo "Checks passed."; \
+	echo ""; \
+	read -r -p "Commit these changes? [y/N] " ANSWER; \
 	if [ "$$ANSWER" = "y" ] || [ "$$ANSWER" = "Y" ]; then \
 {%- if project_name_snake_case == "project_template" %}
 		git add .pre-commit-config.yaml template/.pre-commit-config.yaml.jinja && \

@@ -70,7 +70,7 @@ update-pre-commit-hooks:
 	@if ! git diff --quiet || ! git diff --cached --quiet; then \
 		echo "Git tree is not clean. Commit or stash changes first."; \
 		exit 1; \
-		fi; \
+	fi; \
 	$(UV) run python scripts/update_precommit_template.py || true; \
 	$(UV) run prek autoupdate; \
 	if git diff --quiet -- .pre-commit-config.yaml template/.pre-commit-config.yaml.jinja; then \
@@ -79,11 +79,20 @@ update-pre-commit-hooks:
 	fi; \
 	echo ""; \
 	echo "Changes:"; \
-	git diff -- .pre-commit-config.yaml template/.pre-commit-config.yaml.jinja; \
+	git --no-pager diff --unified=0 -- .pre-commit-config.yaml template/.pre-commit-config.yaml.jinja; \
 	echo ""; \
 	echo "Running checks..."; \
-	$(MAKE) check; \
-	read -p "Commit these changes? [y/N] " ANSWER; \
+	CHECK_LOG=$$(mktemp); \
+	if ! $(MAKE) check >"$$CHECK_LOG" 2>&1; then \
+		echo "Checks failed:"; \
+		cat "$$CHECK_LOG"; \
+		rm -f "$$CHECK_LOG"; \
+		exit 1; \
+	fi; \
+	rm -f "$$CHECK_LOG"; \
+	echo "Checks passed."; \
+	echo ""; \
+	read -r -p "Commit these changes? [y/N] " ANSWER; \
 	if [ "$$ANSWER" = "y" ] || [ "$$ANSWER" = "Y" ]; then \
 		git add .pre-commit-config.yaml template/.pre-commit-config.yaml.jinja && \
 		git commit -m "chore: update pre-commit hooks"; \
