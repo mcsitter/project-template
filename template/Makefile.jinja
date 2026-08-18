@@ -1,7 +1,7 @@
 .DEFAULT_GOAL := help
 MAKEFLAGS += --no-print-directory
 
-{%- set phony_targets = ["check", "clean", "clean-generated", "clean-venv", "git", "help", "init", "run", "sync", "test-template", "update-from-template", "update-github", "update-pre-commit-hooks", "vscode-extensions"] %}
+{%- set phony_targets = ["check", "clean", "clean-generated", "clean-venv", "git", "help", "init", "sync", "update-from-template", "update-github", "update-pre-commit-hooks", "vscode-extensions"] %}
 {%- if project_name_snake_case == "project_template" %}
 {%- set phony_targets = phony_targets + ["test-template"] %}
 {%- endif %}

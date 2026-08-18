@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := help
 MAKEFLAGS += --no-print-directory
-.PHONY: check clean clean-generated clean-venv git help init run sync test-template test-template update-from-template update-github update-pre-commit-hooks vscode-extensions
+.PHONY: check clean clean-generated clean-venv git help init sync test-template update-from-template update-github update-pre-commit-hooks vscode-extensions
 
 UV ?= uv
 VENV_DIR := .venv
