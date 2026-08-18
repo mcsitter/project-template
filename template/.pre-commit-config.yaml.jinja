@@ -25,7 +25,7 @@ repos:
       - id: check-ast
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.16.1
+    rev: v0.16.3
     hooks:
       - id: ruff-check
         args: [--fix]
@@ -40,7 +40,7 @@ repos:
           - "array_auto_collapse=false"
 
   - repo: https://github.com/biomejs/pre-commit
-    rev: v2.5.6
+    rev: v2.5.9
     hooks:
       - id: biome-format
         args:
@@ -48,7 +48,7 @@ repos:
 {%- if typing %}
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v2.3.0
+    rev: v2.3.1
     hooks:
       - id: mypy
         args: [--ignore-missing-imports]
@@ -57,7 +57,7 @@ repos:
 {%- if with_conventional_commits %}
 
   - repo: https://github.com/commitizen-tools/commitizen
-    rev: v4.17.0
+    rev: v4.17.1
     hooks:
       - id: commitizen
         stages: [commit-msg]
