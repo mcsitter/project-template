@@ -52,13 +52,20 @@ clean-venv:
 
 ## Run code quality checks.
 check:
-	@echo "Formatting with ruff..."
-	@$(UV) run prek run ruff-format --all-files >/dev/null || echo "ruff-format updated files"
+	@$(UV) run prek run ruff-format --all-files >/dev/null 2>&1 || echo "ruff-format updated files"
 {%- if project_name_snake_case == "project_template" %}
-	$(UV) run python scripts/add_ruff_rule_links.py
-	$(UV) run python scripts/lint_makefile.py
+	@$(UV) run python scripts/add_ruff_rule_links.py
+	@$(UV) run python scripts/lint_makefile.py
 {%- endif %}
-	$(UV) run {{ pre_commit_tool }} run --all-files
+	@LOG=$$(mktemp); \
+	if $(UV) run {{ pre_commit_tool }} run --all-files >"$$LOG" 2>&1; then \
+		rm -f "$$LOG"; \
+	else \
+		cat "$$LOG"; \
+		rm -f "$$LOG"; \
+		exit 1; \
+	fi
+	@echo "Quality checks passed."
 
 ## Update project files from the template.
 update-from-template:
