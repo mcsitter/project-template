@@ -215,7 +215,7 @@ test-template:
 vscode-extensions:
 	@if [ "$${TERM_PROGRAM:-}" = "vscode" ]; then \
 		installed="$$(code --list-extensions)"; \
-		missing="$$(jq -r '.recommendations[]' .vscode/extensions.json | while read -r extension; do \
+		missing="$$(uv run python -c 'import json; print("\n".join(json.load(open(".vscode/extensions.json"))["recommendations"]))' | while read -r extension; do \
 			if ! printf '%s\n' "$$installed" | grep -ixq "$$extension"; then \
 				echo "$$extension"; \
 			fi; \
