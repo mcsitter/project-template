@@ -19,6 +19,7 @@ build-backend = "setuptools.build_meta"
 
 [tool.ruff]
 line-length = 88
+output-format = "concise"
 extend-exclude = [
   '*\{\{*\}\}*',
   '*\{\%*\%\}*',

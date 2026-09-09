@@ -39,8 +39,8 @@ help:
 
 ## Synchronize dependencies and install development tools.
 sync: pyproject.toml
-	$(UV) sync --group dev
-	$(UV) run {{ pre_commit_tool }} install
+	$(UV) sync --group dev --quiet
+	$(UV) run --quiet {{ pre_commit_tool }} install
 
 ## Remove the virtual environment.
 clean-venv:
@@ -52,13 +52,13 @@ clean-venv:
 
 ## Run code quality checks.
 check:
-	@$(UV) run prek run ruff-format --all-files >/dev/null 2>&1 || echo "ruff-format updated files"
+	@$(UV) run --quiet prek run ruff-format --all-files >/dev/null 2>&1 || echo "ruff-format updated files"
 {%- if project_name_snake_case == "project_template" %}
-	@$(UV) run python scripts/add_ruff_rule_links.py
-	@$(UV) run python scripts/lint_makefile.py
+	@$(UV) run --quiet python scripts/add_ruff_rule_links.py
+	@$(UV) run --quiet python scripts/lint_makefile.py
 {%- endif %}
 	@LOG=$$(mktemp); \
-	if $(UV) run {{ pre_commit_tool }} run --all-files >"$$LOG" 2>&1; then \
+	if $(UV) run --quiet {{ pre_commit_tool }} run --all-files >"$$LOG" 2>&1; then \
 		rm -f "$$LOG"; \
 	else \
 		cat "$$LOG"; \
@@ -73,7 +73,7 @@ update-from-template:
 		echo "Git tree is not clean. Commit or stash changes first."; \
 		exit 1; \
 	fi
-	$(UV) run copier update --defaults
+	$(UV) run --quiet copier update --defaults --quiet
 	@if ! git diff --quiet; then \
 		git diff --check; \
 		if [ $$? -eq 0 ]; then \
@@ -92,9 +92,9 @@ update-pre-commit-hooks:
 		exit 1; \
 	fi; \
 {%- if project_name_snake_case == "project_template" %}
-	$(UV) run python scripts/update_precommit_template.py || true; \
+	$(UV) run --quiet python scripts/update_precommit_template.py || true; \
 {%- endif %}
-	$(UV) run {{ pre_commit_tool }} autoupdate; \
+	$(UV) run --quiet {{ pre_commit_tool }} autoupdate; \
 {%- if project_name_snake_case == "project_template" %}
 	if git diff --quiet -- .pre-commit-config.yaml template/.pre-commit-config.yaml.jinja; then \
 {%- else %}
@@ -238,14 +238,14 @@ init:
 
 ## Test the Copier template by applying it to itself.
 test-template:
-	$(UV) run copier copy --defaults --overwrite --vcs-ref=HEAD . .
+	$(UV) run --quiet copier copy --defaults --overwrite --vcs-ref=HEAD . . --quiet
 {%- endif %}
 
 {%- if project_type == "app" %}
 
 ## Run the {{ project_name }} app.
 run:
-	$(UV) run {{ project_name_kebab_case }}
+	$(UV) run --quiet {{ project_name_kebab_case }}
 {%- endif %}
 
 ## Install missing VS Code extensions.

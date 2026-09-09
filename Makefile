@@ -28,8 +28,8 @@ help:
 
 ## Synchronize dependencies and install development tools.
 sync: pyproject.toml
-	$(UV) sync --group dev
-	$(UV) run prek install
+	$(UV) sync --group dev --quiet
+	$(UV) run --quiet prek install
 
 ## Remove the virtual environment.
 clean-venv:
@@ -41,11 +41,11 @@ clean-venv:
 
 ## Run code quality checks.
 check:
-	@$(UV) run prek run ruff-format --all-files >/dev/null 2>&1 || echo "ruff-format updated files"
-	@$(UV) run python scripts/add_ruff_rule_links.py
-	@$(UV) run python scripts/lint_makefile.py
+	@$(UV) run --quiet prek run ruff-format --all-files >/dev/null 2>&1 || echo "ruff-format updated files"
+	@$(UV) run --quiet python scripts/add_ruff_rule_links.py
+	@$(UV) run --quiet python scripts/lint_makefile.py
 	@LOG=$$(mktemp); \
-	if $(UV) run prek run --all-files >"$$LOG" 2>&1; then \
+	if $(UV) run --quiet prek run --all-files >"$$LOG" 2>&1; then \
 		rm -f "$$LOG"; \
 	else \
 		cat "$$LOG"; \
@@ -60,7 +60,7 @@ update-from-template:
 		echo "Git tree is not clean. Commit or stash changes first."; \
 		exit 1; \
 	fi
-	$(UV) run copier update --defaults
+	$(UV) run --quiet copier update --defaults --quiet
 	@if ! git diff --quiet; then \
 		git diff --check; \
 		if [ $$? -eq 0 ]; then \
@@ -78,8 +78,8 @@ update-pre-commit-hooks:
 		echo "Git tree is not clean. Commit or stash changes first."; \
 		exit 1; \
 	fi; \
-	$(UV) run python scripts/update_precommit_template.py || true; \
-	$(UV) run prek autoupdate; \
+	$(UV) run --quiet python scripts/update_precommit_template.py || true; \
+	$(UV) run --quiet prek autoupdate; \
 	if git diff --quiet -- .pre-commit-config.yaml template/.pre-commit-config.yaml.jinja; then \
 		echo "No pre-commit updates available."; \
 		exit 0; \
@@ -209,7 +209,7 @@ init:
 
 ## Test the Copier template by applying it to itself.
 test-template:
-	$(UV) run copier copy --defaults --overwrite --vcs-ref=HEAD . .
+	$(UV) run --quiet copier copy --defaults --overwrite --vcs-ref=HEAD . . --quiet
 
 ## Install missing VS Code extensions.
 vscode-extensions:
