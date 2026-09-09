@@ -6,9 +6,7 @@ requires-python = ">={{ python_version }}"
 dependencies = []
 
 [dependency-groups]
-types = []
 dev = [
-  { include-group = "types" },
   "copier",
 {%- if typing %}
   "mypy",
@@ -17,7 +15,9 @@ dev = [
 {%- if project_type == "app" %}
   "python-dotenv",
 {%- endif %}
+  { include-group = "types" },
 ]
+types = []
 {%- if project_type == "app" %}
 
 [project.scripts]
@@ -36,6 +36,16 @@ where = ["src"]
 [build-system]
 requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
+{%- if with_conventional_commits %}
+
+[tool.commitizen]
+name = "cz_conventional_commits"
+tag_format = "$version"
+version_scheme = "pep440"
+version_provider = "pep621"
+update_changelog_on_bump = true
+major_version_zero = true
+{%- endif %}
 
 [tool.ruff]
 line-length = 88
@@ -50,17 +60,17 @@ extend-exclude = [
 [tool.ruff.lint]
 select = ["ALL"]
 ignore = [
-  "COM812", # https://docs.astral.sh/ruff/rules/missing-trailing-comma/
-  "CPY001", # https://docs.astral.sh/ruff/rules/missing-copyright-notice/
-  "D203",   # https://docs.astral.sh/ruff/rules/incorrect-blank-line-before-class/
-  "D213",   # https://docs.astral.sh/ruff/rules/multi-line-summary-second-line/
-  "S311",   # https://docs.astral.sh/ruff/rules/suspicious-non-cryptographic-random-usage/
+  "COM812",  # https://docs.astral.sh/ruff/rules/missing-trailing-comma/
+  "CPY001",  # https://docs.astral.sh/ruff/rules/missing-copyright-notice/
+  "D203",  # https://docs.astral.sh/ruff/rules/incorrect-blank-line-before-class/
+  "D213",  # https://docs.astral.sh/ruff/rules/multi-line-summary-second-line/
+  "S311",  # https://docs.astral.sh/ruff/rules/suspicious-non-cryptographic-random-usage/
 ]
 
 [tool.ruff.lint.per-file-ignores]
 "scripts/*.py" = [
-  "INP001", # https://docs.astral.sh/ruff/rules/implicit-namespace-package/
-  "T201",   # https://docs.astral.sh/ruff/rules/print/
+  "INP001",  # https://docs.astral.sh/ruff/rules/implicit-namespace-package/
+  "T201",  # https://docs.astral.sh/ruff/rules/print/
 ]
 
 [tool.ruff.lint.flake8-type-checking]
@@ -70,15 +80,4 @@ runtime-evaluated-base-classes = ["pydantic.BaseModel"]
 
 [tool.mypy]
 ignore_missing_imports = true
-{%- endif %}
-
-{%- if with_conventional_commits %}
-
-[tool.commitizen]
-name = "cz_conventional_commits"
-tag_format = "$version"
-version_scheme = "pep440"
-version_provider = "pep621"
-update_changelog_on_bump = true
-major_version_zero = true
 {%- endif %}

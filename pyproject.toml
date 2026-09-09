@@ -6,16 +6,24 @@ requires-python = ">=3.12"
 dependencies = []
 
 [dependency-groups]
-types = []
 dev = [
-  { include-group = "types" },
   "copier",
   "prek",
+  { include-group = "types" },
 ]
+types = []
 
 [build-system]
 requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
+
+[tool.commitizen]
+name = "cz_conventional_commits"
+tag_format = "$version"
+version_scheme = "pep440"
+version_provider = "pep621"
+update_changelog_on_bump = true
+major_version_zero = true
 
 [tool.ruff]
 line-length = 88
@@ -28,26 +36,18 @@ extend-exclude = [
 [tool.ruff.lint]
 select = ["ALL"]
 ignore = [
-  "COM812", # https://docs.astral.sh/ruff/rules/missing-trailing-comma/
-  "CPY001", # https://docs.astral.sh/ruff/rules/missing-copyright-notice/
-  "D203",   # https://docs.astral.sh/ruff/rules/incorrect-blank-line-before-class/
-  "D213",   # https://docs.astral.sh/ruff/rules/multi-line-summary-second-line/
-  "S311",   # https://docs.astral.sh/ruff/rules/suspicious-non-cryptographic-random-usage/
+  "COM812",  # https://docs.astral.sh/ruff/rules/missing-trailing-comma/
+  "CPY001",  # https://docs.astral.sh/ruff/rules/missing-copyright-notice/
+  "D203",  # https://docs.astral.sh/ruff/rules/incorrect-blank-line-before-class/
+  "D213",  # https://docs.astral.sh/ruff/rules/multi-line-summary-second-line/
+  "S311",  # https://docs.astral.sh/ruff/rules/suspicious-non-cryptographic-random-usage/
 ]
 
 [tool.ruff.lint.per-file-ignores]
 "scripts/*.py" = [
-  "INP001", # https://docs.astral.sh/ruff/rules/implicit-namespace-package/
-  "T201",   # https://docs.astral.sh/ruff/rules/print/
+  "INP001",  # https://docs.astral.sh/ruff/rules/implicit-namespace-package/
+  "T201",  # https://docs.astral.sh/ruff/rules/print/
 ]
 
 [tool.ruff.lint.flake8-type-checking]
 runtime-evaluated-base-classes = ["pydantic.BaseModel"]
-
-[tool.commitizen]
-name = "cz_conventional_commits"
-tag_format = "$version"
-version_scheme = "pep440"
-version_provider = "pep621"
-update_changelog_on_bump = true
-major_version_zero = true
