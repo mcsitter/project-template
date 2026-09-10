@@ -4,6 +4,11 @@ version = "0.1.0"
 description = "{{ project_description }}"
 requires-python = ">={{ python_version }}"
 dependencies = []
+{%- if project_type == "app" %}
+
+[project.scripts]
+{{ project_name_kebab_case }} = "{{ project_name_snake_case }}.main:main"
+{%- endif %}
 
 [dependency-groups]
 dev = [
@@ -18,11 +23,6 @@ dev = [
   { include-group = "types" },
 ]
 types = []
-{%- if project_type == "app" %}
-
-[project.scripts]
-{{ project_name_kebab_case }} = "{{ project_name_snake_case }}.main:main"
-{%- endif %}
 {%- if project_name_snake_case != "project_template" %}
 
 [tool.setuptools]
