@@ -46,6 +46,11 @@ version_provider = "pep621"
 update_changelog_on_bump = true
 major_version_zero = true
 {%- endif %}
+{%- if typing %}
+
+[tool.mypy]
+ignore_missing_imports = true
+{%- endif %}
 
 [tool.ruff]
 line-length = 88
@@ -75,9 +80,3 @@ ignore = [
 
 [tool.ruff.lint.flake8-type-checking]
 runtime-evaluated-base-classes = ["pydantic.BaseModel"]
-
-{%- if typing %}
-
-[tool.mypy]
-ignore_missing_imports = true
-{%- endif %}
