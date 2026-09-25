@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Install missing recommended Visual Studio Code extensions."""
 
 from __future__ import annotations

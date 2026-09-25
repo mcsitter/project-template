@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Update pre-commit hook revisions and commit the resulting changes."""
 
 from __future__ import annotations
@@ -7,9 +8,6 @@ import re
 import subprocess
 import sys
 from pathlib import Path
-from typing import Any
-
-import yaml
 
 CONFIG_FILE = Path(".pre-commit-config.yaml")
 TEMPLATE_FILE = Path("template/.pre-commit-config.yaml.jinja")
@@ -31,14 +29,21 @@ def _strip_jinja(text: str) -> str:
     return JINJA_PATTERN.sub("", text)
 
 
-def _revisions(config: dict[str, Any]) -> dict[str, str]:
-    return {
-        repository["repo"]: repository["rev"]
-        for repository in config.get("repos", [])
-        if isinstance(repository, dict)
-        and isinstance(repository.get("repo"), str)
-        and isinstance(repository.get("rev"), str)
-    }
+def _revisions(text: str) -> dict[str, str]:
+    """Extract ``repo`` to ``rev`` pairs from a pre-commit config.
+
+    The config only ever contains a flat ``repos`` list of ``repo``/``rev``
+    keys, so a line scan avoids depending on a YAML library.
+    """
+    revisions: dict[str, str] = {}
+    current_repo: str | None = None
+    for line in text.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("- repo:"):
+            current_repo = stripped.split("repo:", 1)[1].strip().strip("'\"")
+        elif stripped.startswith("rev:") and current_repo is not None:
+            revisions[current_repo] = stripped.split("rev:", 1)[1].strip().strip("'\"")
+    return revisions
 
 
 def _patch_template(text: str, revisions: dict[str, str]) -> str:
@@ -85,8 +90,8 @@ def update_hooks(*, assume_yes: bool = False) -> int:
             CONFIG_FILE.write_text(original_config, encoding="utf-8")
         if status != 0:
             return status
-        config = yaml.safe_load(CONFIG_FILE.read_text(encoding="utf-8")) or {}
-        updated_template = _patch_template(template_text, _revisions(config))
+        config_text = CONFIG_FILE.read_text(encoding="utf-8")
+        updated_template = _patch_template(template_text, _revisions(config_text))
         if updated_template != template_text:
             TEMPLATE_FILE.write_text(updated_template, encoding="utf-8")
     else:

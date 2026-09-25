@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Update a generated project from its Copier template."""
 
 from __future__ import annotations

@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Update GitHub repository metadata from Copier answers."""
 
 from __future__ import annotations
