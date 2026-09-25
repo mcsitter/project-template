@@ -74,8 +74,12 @@ ignore = [
 
 [tool.ruff.lint.per-file-ignores]
 "scripts/*.py" = [
-  "INP001",  # https://docs.astral.sh/ruff/rules/implicit-namespace-package/
-  "T201",  # https://docs.astral.sh/ruff/rules/print/
+  "C901",
+  "INP001",
+  "PLR0911",
+  "PLR0912",
+  "S603",
+  "T201",
 ]
 
 [tool.ruff.lint.flake8-type-checking]
