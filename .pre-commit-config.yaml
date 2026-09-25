@@ -22,6 +22,11 @@ repos:
       - id: requirements-txt-fixer
       - id: check-ast
 
+  - repo: https://github.com/mcsitter/pre-commit-hooks
+    rev: v0.0.1
+    hooks:
+      - id: ruff-rule-links
+
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.16.3
     hooks:

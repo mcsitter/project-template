@@ -60,7 +60,7 @@ update-from-template:
 		echo "Git tree is not clean. Commit or stash changes first."; \
 		exit 1; \
 	fi
-	$(UV) run --quiet copier update --defaults --quiet
+	uvx --isolated --refresh --from copier@latest copier update --defaults --quiet
 	@if ! git diff --quiet; then \
 		git diff --check; \
 		if [ $$? -eq 0 ]; then \
@@ -209,7 +209,7 @@ init:
 
 ## Test the Copier template by applying it to itself.
 test-template:
-	$(UV) run --quiet copier copy --defaults --overwrite --vcs-ref=HEAD . . --quiet
+	uvx --isolated --refresh --from copier@latest copier copy --defaults --overwrite --vcs-ref=HEAD . . --quiet
 
 ## Install missing VS Code extensions.
 vscode-extensions:
