@@ -24,7 +24,7 @@ def get_rule_slug(rule: str) -> str:
     if uvx_path is None:
         msg = "uvx is required to generate Ruff links."
         raise RuntimeError(msg)
-    result = subprocess.run(  # noqa: S603 - uvx is resolved from PATH
+    result = subprocess.run(
         [uvx_path, "ruff", "rule", rule],
         check=True,
         capture_output=True,

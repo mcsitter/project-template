@@ -52,14 +52,6 @@ ignore = [
   "S603",  # https://docs.astral.sh/ruff/rules/subprocess-without-shell-equals-true/
   "T201",  # https://docs.astral.sh/ruff/rules/print/
 ]
-"template/scripts/*.py" = [
-  "C901",  # https://docs.astral.sh/ruff/rules/complex-structure/
-  "INP001",  # https://docs.astral.sh/ruff/rules/implicit-namespace-package/
-  "PLR0911",  # https://docs.astral.sh/ruff/rules/too-many-return-statements/
-  "PLR0912",  # https://docs.astral.sh/ruff/rules/too-many-branches/
-  "S603",  # https://docs.astral.sh/ruff/rules/subprocess-without-shell-equals-true/
-  "T201",  # https://docs.astral.sh/ruff/rules/print/
-]
 
 [tool.ruff.lint.flake8-type-checking]
 runtime-evaluated-base-classes = ["pydantic.BaseModel"]
