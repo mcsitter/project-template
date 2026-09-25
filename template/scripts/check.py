@@ -13,7 +13,7 @@ import argparse
 import subprocess
 import sys
 
-TOOLS = ("prek", "pre_commit")
+TOOL = "prek"
 
 
 def _run(
@@ -32,29 +32,29 @@ def _worktree_diff() -> str:
     return result.stdout if result.returncode == 0 else ""
 
 
-def _run_hooks(tool: str, *, verbose: bool) -> tuple[int, str]:
+def _run_hooks(*, verbose: bool) -> tuple[int, str]:
     """Run the hooks, retrying once when they only failed to auto-fix."""
     if verbose:
-        first = _run([tool, "run", "--all-files"])
+        first = _run([TOOL, "run", "--all-files"])
         if first.returncode == 0:
             return 0, ""
         print("Hooks failed; re-running.")
-        second = _run([tool, "run", "--all-files"])
+        second = _run([TOOL, "run", "--all-files"])
         return second.returncode, ""
     before = _worktree_diff()
-    first = _run([tool, "run", "--all-files"], capture=True)
+    first = _run([TOOL, "run", "--all-files"], capture=True)
     if first.returncode == 0:
         return 0, ""
     if _worktree_diff() == before:
         return first.returncode, first.stdout + first.stderr
     print("Hooks applied fixes; re-running.")
-    second = _run([tool, "run", "--all-files"], capture=True)
+    second = _run([TOOL, "run", "--all-files"], capture=True)
     return second.returncode, second.stdout + second.stderr
 
 
-def check(tool: str, extra: list[str], *, verbose: bool = False) -> int:
+def check(extra: list[str], *, verbose: bool = False) -> int:
     """Run the hook suite followed by an extra check command."""
-    status, output = _run_hooks(tool, verbose=verbose)
+    status, output = _run_hooks(verbose=verbose)
     if status != 0:
         sys.stdout.write(output)
         return status
@@ -71,12 +71,6 @@ def main() -> int:
     """Run the quality checks."""
     parser = argparse.ArgumentParser(description="Run the quality checks.")
     parser.add_argument(
-        "--tool",
-        choices=TOOLS,
-        default="prek",
-        help="Pre-commit runner to use.",
-    )
-    parser.add_argument(
         "--verbose",
         action="store_true",
         help="Stream hook output instead of only showing it on failure.",
@@ -88,7 +82,7 @@ def main() -> int:
     )
     args = parser.parse_args()
     command = [item for item in args.command if item != "--"]
-    return check(str(args.tool), command, verbose=bool(args.verbose))
+    return check(command, verbose=bool(args.verbose))
 
 
 if __name__ == "__main__":

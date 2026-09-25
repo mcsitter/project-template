@@ -33,14 +33,6 @@ python_version:
   help: "{% if project_type == 'app' %}Which Python version should your app use?{% else %}What is the minimum Python version your package should support?{% endif %}"
   default: "{% if project_type == 'app' %}3.14{% else %}3.12{% endif %}"
 
-pre_commit_tool:
-  type: str
-  default: prek
-  choices:
-    - prek
-    - pre_commit
-  help: Which pre-commit tool do you want to use? (Use prek if you don't know the difference)
-
 with_conventional_commits:
   type: bool
   help: Do you want to follow the Conventional Commits standard (https://www.conventionalcommits.org) for your commit messages?

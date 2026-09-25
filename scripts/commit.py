@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-"""Commit the current changes and push the current branch.
+"""Commit the current changes.
 
 Used as the final step of maintenance workflows. The staged file list is shown
 before committing, and whitespace errors abort the commit so a broken diff is
-never pushed. Pass ``--message`` to override the default commit subject.
+never recorded. Pass ``--message`` to override the default subject.
+
+Nothing is pushed; publishing stays a deliberate, manual step.
 """
 
 from __future__ import annotations
@@ -39,8 +41,8 @@ def _check_whitespace(*, staged: bool) -> bool:
     return result.returncode == 0
 
 
-def commit_and_push(message: str) -> int:
-    """Commit pending changes and push the current branch."""
+def commit(message: str) -> int:
+    """Commit pending changes, if there are any."""
     if not _porcelain().strip():
         print("Nothing to commit.")
     else:
@@ -63,24 +65,19 @@ def commit_and_push(message: str) -> int:
             return commit.returncode
         revision = _run(["git", "rev-parse", "--short", "HEAD"], capture=True)
         print(f"Committed {revision.stdout.strip()}.")
-    push = _run(["git", "push"])
-    if push.returncode != 0:
-        return push.returncode
-    branch = _run(["git", "branch", "--show-current"], capture=True).stdout.strip()
-    print(f"Pushed {branch}.")
     return 0
 
 
 def main() -> int:
-    """Commit and push the current changes."""
-    parser = argparse.ArgumentParser(description="Commit and push changes.")
+    """Commit the current changes."""
+    parser = argparse.ArgumentParser(description="Commit pending changes.")
     parser.add_argument(
         "--message",
         default=DEFAULT_MESSAGE,
         help="Commit message to use.",
     )
     args = parser.parse_args()
-    return commit_and_push(str(args.message))
+    return commit(str(args.message))
 
 
 if __name__ == "__main__":

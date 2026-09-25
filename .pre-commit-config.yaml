@@ -23,9 +23,10 @@ repos:
       - id: check-ast
 
   - repo: https://github.com/mcsitter/pre-commit-hooks
-    rev: v0.0.1
+    rev: v0.1.0
     hooks:
       - id: ruff-rule-links
+      - id: sentence-per-line
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.16.3

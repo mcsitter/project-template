@@ -36,7 +36,7 @@ help:
 ## Synchronize dependencies and install development tools.
 sync: pyproject.toml
 	$(UV) sync --group dev --quiet
-	$(UV) run --quiet {{ pre_commit_tool }} install
+	$(UV) run --quiet prek install
 
 ## Run code quality checks.
 check:
@@ -44,7 +44,7 @@ check:
 	@$(UV) run --quiet python scripts/add_ruff_rule_links.py
 	@$(UV) run --quiet python scripts/lint_makefile.py
 {%- endif %}
-	@$(UV) run --quiet python scripts/check.py --tool {{ pre_commit_tool }}
+	@$(UV) run --quiet python scripts/check.py
 
 ## Remove build artifacts and untracked files (keeps the .venv folder and .env files).
 clean:

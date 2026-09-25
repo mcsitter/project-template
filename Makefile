@@ -31,7 +31,7 @@ sync: pyproject.toml
 check:
 	@$(UV) run --quiet python scripts/add_ruff_rule_links.py
 	@$(UV) run --quiet python scripts/lint_makefile.py
-	@$(UV) run --quiet python scripts/check.py --tool prek
+	@$(UV) run --quiet python scripts/check.py
 
 ## Remove build artifacts and untracked files (keeps the .venv folder and .env files).
 clean:

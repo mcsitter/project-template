@@ -4,7 +4,7 @@
 ``git init`` is performed first so the remaining steps have a repository to
 work with, then the Makefile's ``sync`` and ``check`` targets are invoked. When
 the repository has no commits yet the staged tree is offered for an initial
-commit, which is pushed only if a remote is already configured.
+commit. Nothing is ever pushed; that stays a deliberate, manual step.
 """
 
 from __future__ import annotations
@@ -66,14 +66,6 @@ def _initial_commit(*, assume_yes: bool) -> bool:
     return commit.returncode == 0
 
 
-def _push_initial() -> None:
-    if _run(["git", "remote", "get-url", "origin"], capture=True).returncode != 0:
-        return
-    print("Pushing initial commit...")
-    branch = _run(["git", "branch", "--show-current"], capture=True).stdout.strip()
-    _run(["git", "push", "-u", "origin", branch])
-
-
 def initialize(extra_targets: list[str], *, assume_yes: bool) -> int:
     """Initialize the repository and run the requested setup steps."""
     _ensure_repository()
@@ -82,9 +74,8 @@ def initialize(extra_targets: list[str], *, assume_yes: bool) -> int:
         if status != 0:
             print(f"Setup step failed: make {target}", file=sys.stderr)
             return status
-    committed = _initial_commit(assume_yes=assume_yes) if not _has_commits() else False
-    if committed:
-        _push_initial()
+    if not _has_commits():
+        _initial_commit(assume_yes=assume_yes)
     return 0
 
 

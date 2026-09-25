@@ -4,41 +4,41 @@
 Two independent stages are available so that callers keep control over how
 much is deleted:
 
-* the *generated artifacts* stage removes well-known build output such as
-  caches, ``build/`` and ``dist/``; it never touches tracked files and
-  supports ``--dry-run``;
+* the *artifacts* stage removes well-known build output such as caches,
+  ``build/`` and ``dist/``; it never touches tracked files and supports
+  ``--dry-run``;
 * the *untracked* stage additionally removes everything Git reports as
   untracked or ignored, which is what a fresh clone leaves behind.
 
 Both stages preview what they would delete and ask for confirmation unless
 ``--yes`` is given. The untracked stage always keeps the virtualenv, ``.env``
-files, untracked Python sources, the lockfile, and the Copier answers file;
-register genuinely generated output in ``clean_paths.txt`` (one path per line)
-or pass it as an extra argument so it is removed deliberately by the artifacts
-stage instead.
+files, untracked Python sources, the lockfile, and the Copier answers file.
+
+Project-specific generated output is removed by the artifacts stage through
+``--pattern``, a repeatable regular expression matched against repo-relative
+paths, for example ``--pattern '^generated/'``.
 """
 
 from __future__ import annotations
 
 import argparse
 import os
+import re
 import shutil
 import subprocess
 import sys
 from pathlib import Path
 
-ARTIFACT_DIRECTORIES = (
-    "build",
-    "dist",
-    ".import_linter_cache",
-    ".mypy_cache",
-    ".pytest_cache",
-    ".ruff_cache",
+DEFAULT_PATTERNS = (
+    r"(^|/)build$",
+    r"(^|/)dist$",
+    r"\.egg-info$",
+    r"(^|/)__pycache__$",
+    r"^\.import_linter_cache$",
+    r"^\.mypy_cache$",
+    r"^\.pytest_cache$",
+    r"^\.ruff_cache$",
 )
-ARTIFACT_SUFFIXES = (".egg-info",)
-ARTIFACT_NAMES = ("__pycache__",)
-PATHS_FILE = Path("clean_paths.txt")
-BUNDLED_PATHS_FILE = Path(__file__).resolve().parent / "clean_paths.txt"
 PROTECTED = (
     ".venv/",
     ".env*",
@@ -73,22 +73,12 @@ def _git_tracked() -> set[str]:
     return {line for line in result.stdout.splitlines() if line}
 
 
-def _extra_paths(arguments: list[str]) -> list[str]:
-    """Collect generated paths from arguments and the registered files."""
-    paths = list(arguments)
-    seen: set[Path] = set()
-    for candidate in (BUNDLED_PATHS_FILE, PATHS_FILE):
-        if candidate in seen or not candidate.is_file():
-            continue
-        seen.add(candidate)
-        for line in candidate.read_text(encoding="utf-8").splitlines():
-            entry = line.split("#", 1)[0].strip()
-            if entry:
-                paths.append(entry)
-    return paths
+def _compile(patterns: list[str]) -> list[re.Pattern[str]]:
+    """Compile the default patterns together with any user patterns."""
+    return [re.compile(pattern) for pattern in (*DEFAULT_PATTERNS, *patterns)]
 
 
-def _walk_artifacts() -> list[Path]:
+def _walk_artifacts(patterns: list[re.Pattern[str]]) -> list[Path]:
     """Find artifact directories, skipping virtualenvs and VCS metadata."""
     found: list[Path] = []
     for root, directories, _ in os.walk(".", topdown=True):
@@ -97,19 +87,16 @@ def _walk_artifacts() -> list[Path]:
             if name in PRUNED_DIRECTORIES:
                 continue
             path = Path(root) / name
-            if name in ARTIFACT_NAMES or name.endswith(ARTIFACT_SUFFIXES):
+            relative = path.as_posix().removeprefix("./")
+            if any(pattern.search(relative) for pattern in patterns):
                 found.append(path)
                 continue
             kept.append(name)
         directories[:] = kept
-        current = Path(root)
-        if current.name in ARTIFACT_NAMES:
-            found.append(current)
-            directories[:] = []
     return found
 
 
-def _collect_artifacts(extra: list[str]) -> list[Path]:
+def _collect_artifacts(patterns: list[re.Pattern[str]]) -> list[Path]:
     """Return artifact paths that exist and are not tracked by Git."""
     tracked = _git_tracked()
     found: list[Path] = []
@@ -118,11 +105,7 @@ def _collect_artifacts(extra: list[str]) -> list[Path]:
         if path.exists() and str(path) not in tracked and path not in found:
             found.append(path)
 
-    for directory in ARTIFACT_DIRECTORIES:
-        add(Path(directory))
-    for entry in extra:
-        add(Path(entry))
-    for artifact in _walk_artifacts():
+    for artifact in _walk_artifacts(patterns):
         if str(artifact) not in tracked:
             add(artifact)
     return found
@@ -135,9 +118,11 @@ def _remove(path: Path) -> None:
         path.unlink()
 
 
-def clean_artifacts(extra: list[str], *, dry_run: bool, assume_yes: bool) -> int:
+def clean_artifacts(
+    patterns: list[re.Pattern[str]], *, dry_run: bool, assume_yes: bool
+) -> int:
     """Remove well-known build artifacts and registered generated paths."""
-    artifacts = _collect_artifacts(extra)
+    artifacts = _collect_artifacts(patterns)
     if not artifacts:
         print("No generated artifacts found.")
         return 0
@@ -193,9 +178,11 @@ def main() -> int:
         description="Remove build artifacts and generated files.",
     )
     parser.add_argument(
-        "paths",
-        nargs="*",
-        help="Additional generated paths to remove.",
+        "--pattern",
+        action="append",
+        default=[],
+        metavar="REGEX",
+        help="Extra regex matched against repo-relative paths. Repeatable.",
     )
     parser.add_argument(
         "--artifacts-only",
@@ -214,7 +201,7 @@ def main() -> int:
     )
     args = parser.parse_args()
     status = clean_artifacts(
-        _extra_paths(args.paths),
+        _compile([str(pattern) for pattern in args.pattern]),
         dry_run=bool(args.dry_run),
         assume_yes=bool(args.yes),
     )

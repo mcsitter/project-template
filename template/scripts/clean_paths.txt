@@ -1,2 +1,0 @@
-# Extra generated paths removed by scripts/clean.py.
-# One path per line; blank lines and # comments are ignored.
