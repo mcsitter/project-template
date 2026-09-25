@@ -38,6 +38,7 @@ ARTIFACT_DIRECTORIES = (
 ARTIFACT_SUFFIXES = (".egg-info",)
 ARTIFACT_NAMES = ("__pycache__",)
 PATHS_FILE = Path("clean_paths.txt")
+BUNDLED_PATHS_FILE = Path(__file__).resolve().parent / "clean_paths.txt"
 PROTECTED = (
     ".venv/",
     ".env*",
@@ -73,9 +74,14 @@ def _git_tracked() -> set[str]:
 
 
 def _extra_paths(arguments: list[str]) -> list[str]:
+    """Collect generated paths from arguments and the registered files."""
     paths = list(arguments)
-    if PATHS_FILE.is_file():
-        for line in PATHS_FILE.read_text(encoding="utf-8").splitlines():
+    seen: set[Path] = set()
+    for candidate in (BUNDLED_PATHS_FILE, PATHS_FILE):
+        if candidate in seen or not candidate.is_file():
+            continue
+        seen.add(candidate)
+        for line in candidate.read_text(encoding="utf-8").splitlines():
             entry = line.split("#", 1)[0].strip()
             if entry:
                 paths.append(entry)
