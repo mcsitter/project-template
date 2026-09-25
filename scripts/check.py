@@ -10,7 +10,6 @@ have settled, which is how project-specific checks are plugged in.
 from __future__ import annotations
 
 import argparse
-import shlex
 import subprocess
 import sys
 
@@ -54,15 +53,15 @@ def _run_hooks(tool: str, *, verbose: bool) -> tuple[int, str]:
 
 
 def check(tool: str, extra: list[str], *, verbose: bool = False) -> int:
-    """Run the hook suite followed by any extra check commands."""
+    """Run the hook suite followed by an extra check command."""
     status, output = _run_hooks(tool, verbose=verbose)
     if status != 0:
         sys.stdout.write(output)
         return status
-    for command in extra:
-        result = _run(shlex.split(command))
+    if extra:
+        result = _run(extra)
         if result.returncode != 0:
-            print(f"Check failed: {command}", file=sys.stderr)
+            print(f"Check failed: {' '.join(extra)}", file=sys.stderr)
             return result.returncode
     print("Quality checks passed.")
     return 0
@@ -83,12 +82,13 @@ def main() -> int:
         help="Stream hook output instead of only showing it on failure.",
     )
     parser.add_argument(
-        "commands",
-        nargs="*",
-        help="Extra commands to run after the hooks pass.",
+        "command",
+        nargs=argparse.REMAINDER,
+        help="One extra command to run after the hooks pass, after '--'.",
     )
     args = parser.parse_args()
-    return check(str(args.tool), list(args.commands), verbose=bool(args.verbose))
+    command = [item for item in args.command if item != "--"]
+    return check(str(args.tool), command, verbose=bool(args.verbose))
 
 
 if __name__ == "__main__":
