@@ -33,8 +33,15 @@ def _worktree_diff() -> str:
     return result.stdout if result.returncode == 0 else ""
 
 
-def _run_hooks(tool: str) -> tuple[int, str]:
+def _run_hooks(tool: str, *, verbose: bool) -> tuple[int, str]:
     """Run the hooks, retrying once when they only failed to auto-fix."""
+    if verbose:
+        first = _run([tool, "run", "--all-files"])
+        if first.returncode == 0:
+            return 0, ""
+        print("Hooks failed; re-running.")
+        second = _run([tool, "run", "--all-files"])
+        return second.returncode, ""
     before = _worktree_diff()
     first = _run([tool, "run", "--all-files"], capture=True)
     if first.returncode == 0:
@@ -46,9 +53,9 @@ def _run_hooks(tool: str) -> tuple[int, str]:
     return second.returncode, second.stdout + second.stderr
 
 
-def check(tool: str, extra: list[str]) -> int:
+def check(tool: str, extra: list[str], *, verbose: bool = False) -> int:
     """Run the hook suite followed by any extra check commands."""
-    status, output = _run_hooks(tool)
+    status, output = _run_hooks(tool, verbose=verbose)
     if status != 0:
         sys.stdout.write(output)
         return status
@@ -71,12 +78,17 @@ def main() -> int:
         help="Pre-commit runner to use.",
     )
     parser.add_argument(
+        "--verbose",
+        action="store_true",
+        help="Stream hook output instead of only showing it on failure.",
+    )
+    parser.add_argument(
         "commands",
         nargs="*",
         help="Extra commands to run after the hooks pass.",
     )
     args = parser.parse_args()
-    return check(str(args.tool), list(args.commands))
+    return check(str(args.tool), list(args.commands), verbose=bool(args.verbose))
 
 
 if __name__ == "__main__":
