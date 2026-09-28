@@ -62,8 +62,23 @@ def tests_pass(*, verbose: bool) -> bool:
     return report.returncode == 0
 
 
-def ci(*, verbose: bool = False) -> int:
-    """Run the lockfile check, the quality hooks, and the tests."""
+def _run_extra(command: list[str], *, verbose: bool) -> bool:
+    """Run a project-specific check after the generic ones pass."""
+    if not command:
+        return True
+    result = _run(command, capture=not verbose)
+    if result.returncode != 0 and not verbose:
+        sys.stdout.write(result.stdout)
+        sys.stderr.write(result.stderr)
+    return result.returncode == 0
+
+
+def ci(extra: list[str], *, verbose: bool = False) -> int:
+    """Run the lockfile check, the quality hooks, the tests, and any extra check.
+
+    ``extra`` is the project-specific check a CI job should also run, such as a
+    consistency command. It runs last, because the generic checks are cheaper.
+    """
     if not lockfile_is_current(verbose=verbose):
         return 1
     status = _run(
@@ -77,6 +92,9 @@ def ci(*, verbose: bool = False) -> int:
         return status.returncode
     if not tests_pass(verbose=verbose):
         print("Tests or coverage failed.", file=sys.stderr)
+        return 1
+    if not _run_extra(extra, verbose=verbose):
+        print(f"Extra check failed: {' '.join(extra)}", file=sys.stderr)
         return 1
     print("CI checks passed.")
     return 0
@@ -92,8 +110,14 @@ def main() -> int:
         action="store_true",
         help="Stream command output instead of only showing failures.",
     )
+    parser.add_argument(
+        "command",
+        nargs=argparse.REMAINDER,
+        help="One extra check command to run after the tests, after '--'.",
+    )
     args = parser.parse_args()
-    return ci(verbose=bool(args.verbose))
+    command = [item for item in args.command if item != "--"]
+    return ci(command, verbose=bool(args.verbose))
 
 
 if __name__ == "__main__":
