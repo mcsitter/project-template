@@ -7,12 +7,21 @@ import re
 from pathlib import Path
 
 TARGET_RE = re.compile(r"^([A-Za-z0-9_.%/@+-]+):(?:\s|$)")
+# A target-specific variable, e.g. "ci: export CI := true". This continues an
+# existing target instead of introducing a new one.
+TARGET_EXPORT_RE = re.compile(r"^([A-Za-z0-9_.%/@+-]+):\s*export\s+")
 PHONY_RE = re.compile(r"^\.PHONY:\s*(.*)$")
 
 
 def get_targets(lines: list[str]) -> list[tuple[str, int]]:
-    """Get Makefile targets with line numbers."""
+    """Get Makefile targets with line numbers.
+
+    A target may be spread over several lines, and a target-specific export such
+    as ``ci: export CI := true`` continues the target above it, so neither counts
+    as a second definition of the same target.
+    """
     targets: list[tuple[str, int]] = []
+    seen: set[str] = set()
 
     for lineno, line in enumerate(lines, start=1):
         match = TARGET_RE.match(line)
@@ -24,19 +33,42 @@ def get_targets(lines: list[str]) -> list[tuple[str, int]]:
         if target.startswith("."):
             continue
 
+        if TARGET_EXPORT_RE.match(line):
+            continue
+        if target in seen:
+            continue
+        seen.add(target)
+
         targets.append((target, lineno))
 
     return targets
 
 
+def _comment_index(lines: list[str], index: int) -> int | None:
+    """Return the index of the line documenting the target at ``index``.
+
+    A target-specific export such as ``ci: export CI := true`` belongs to the
+    target declaration, so the documented comment is looked up past those lines.
+    """
+    cursor = index - 1
+    while cursor >= 0 and TARGET_EXPORT_RE.match(lines[cursor]):
+        cursor -= 1
+    if cursor >= 0 and lines[cursor].startswith("## "):
+        return cursor
+    return None
+
+
 def has_comment(lines: list[str], index: int) -> bool:
     """Check if a target has a preceding comment."""
-    return index > 0 and lines[index - 1].startswith("## ")
+    return _comment_index(lines, index) is not None
 
 
 def get_comment(lines: list[str], index: int) -> str:
     """Get target comment text."""
-    return lines[index - 1].removeprefix("## ")
+    cursor = _comment_index(lines, index)
+    if cursor is None:
+        return ""
+    return lines[cursor].removeprefix("## ")
 
 
 def check_comment_format(comment: str) -> list[str]:
@@ -59,6 +91,7 @@ def check_comment_format(comment: str) -> list[str]:
 def check_comments(lines: list[str]) -> list[str]:
     """Check that targets have valid comments."""
     errors: list[str] = []
+    seen: set[str] = set()
 
     for index, line in enumerate(lines):
         match = TARGET_RE.match(line)
@@ -70,6 +103,15 @@ def check_comments(lines: list[str]) -> list[str]:
 
         if target.startswith("."):
             continue
+
+        # A target may be spread over several lines, and a target-specific
+        # export continues the target above it. Only the first line that
+        # actually defines the target needs a documented comment.
+        if TARGET_EXPORT_RE.match(line):
+            continue
+        if target in seen:
+            continue
+        seen.add(target)
 
         if not has_comment(lines, index):
             errors.append(f"Target '{target}' is missing a comment (line {index + 1}).")

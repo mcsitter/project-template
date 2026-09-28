@@ -35,7 +35,10 @@ check:
 	@$(UV) run --quiet python scripts/lint_makefile.py
 	@$(UV) run --quiet python scripts/check.py
 
+# Mark the commands below as running in CI so tools that adapt to it can tell.
+# An existing CI value wins, so a provider's own setting is never overwritten.
 ## Run the checks and the test suite under coverage.
+ci: export CI := $(if $(CI),$(CI),true)
 ci: check
 	@$(UV) run --quiet coverage run -m pytest -q
 	@$(UV) run --quiet coverage report
