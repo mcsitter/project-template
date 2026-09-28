@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := help
 MAKEFLAGS += --no-print-directory
-.PHONY: check clean help init sync test-template
+.PHONY: check ci clean help init sync test-template
 
 UV ?= uv
 VENV_DIR := .venv
@@ -16,6 +16,7 @@ help:
 	@echo "Typical workflow:"
 	@echo "  make init                     Set up the project and development environment"
 	@echo "  make check                    Format and run quality checks"
+	@echo "  make ci                       Run the lockfile, quality, and test checks"
 	@echo "  make clean                    Remove build artifacts and untracked files"
 	@echo ""
 	@echo "All targets:"
@@ -32,6 +33,10 @@ check:
 	@$(UV) run --quiet python scripts/add_ruff_rule_links.py
 	@$(UV) run --quiet python scripts/lint_makefile.py
 	@$(UV) run --quiet python scripts/check.py
+
+## Run the lockfile, quality, and test checks.
+ci:
+	@$(UV) run --no-sync --quiet python scripts/ci.py
 
 ## Remove build artifacts and untracked files (keeps the .venv folder and .env files).
 clean:

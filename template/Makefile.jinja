@@ -1,7 +1,7 @@
 .DEFAULT_GOAL := help
 MAKEFLAGS += --no-print-directory
 
-{%- set phony_targets = ["check", "clean", "help", "init", "sync"] %}
+{%- set phony_targets = ["check", "ci", "clean", "help", "init", "sync"] %}
 {%- if project_name_snake_case == "project_template" %}
 {%- set phony_targets = phony_targets + ["test-template"] %}
 {%- endif %}
@@ -27,6 +27,7 @@ help:
 	@echo "  make run                      Run the {{ project_type }}"
 {%- endif %}
 	@echo "  make check                    Format and run quality checks"
+	@echo "  make ci                       Run the lockfile, quality, and test checks"
 	@echo "  make clean                    Remove build artifacts and untracked files"
 	@echo ""
 	@echo "All targets:"
@@ -45,6 +46,10 @@ check:
 	@$(UV) run --quiet python scripts/lint_makefile.py
 {%- endif %}
 	@$(UV) run --quiet python scripts/check.py
+
+## Run the lockfile, quality, and test checks.
+ci:
+	@$(UV) run --no-sync --quiet python scripts/ci.py
 
 ## Remove build artifacts and untracked files (keeps the .venv folder and .env files).
 clean:

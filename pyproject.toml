@@ -8,6 +8,7 @@ dependencies = []
 [dependency-groups]
 dev = [
   "copier",
+  "coverage[toml]",
   "prek",
   { include-group = "types" },
 ]
@@ -24,6 +25,18 @@ version_scheme = "pep440"
 version_provider = "pep621"
 update_changelog_on_bump = true
 major_version_zero = true
+
+[tool.coverage.run]
+branch = true
+source = ["src"]
+omit = ["*/__main__.py", "*/.venv/*"]
+
+# A floor, not a target. It exists to catch a large regression; it is not a
+# reason to write a test that only executes lines. Raise it deliberately.
+[tool.coverage.report]
+fail_under = 60
+show_missing = true
+skip_covered = false
 
 [tool.ruff]
 line-length = 88

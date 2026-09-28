@@ -13,6 +13,7 @@ dependencies = []
 [dependency-groups]
 dev = [
   "copier",
+  "coverage[toml]",
 {%- if typing %}
   "mypy",
 {%- endif %}
@@ -51,6 +52,18 @@ major_version_zero = true
 [tool.mypy]
 ignore_missing_imports = true
 {%- endif %}
+
+[tool.coverage.run]
+branch = true
+source = ["src"]
+omit = ["*/__main__.py", "*/.venv/*"]
+
+# A floor, not a target. It exists to catch a large regression; it is not a
+# reason to write a test that only executes lines. Raise it deliberately.
+[tool.coverage.report]
+fail_under = 60
+show_missing = true
+skip_covered = false
 
 [tool.ruff]
 line-length = 88
