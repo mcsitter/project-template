@@ -50,11 +50,8 @@ check:
 
 ## Run the checks and the test suite under coverage.
 ci: check
-	@if test -d tests; then \
-		$(UV) run --quiet coverage run -m pytest -q && $(UV) run --quiet coverage report; \
-	else \
-		echo "No tests directory; skipping the test suite."; \
-	fi
+	@$(UV) run --quiet coverage run -m pytest -q
+	@$(UV) run --quiet coverage report
 
 ## Remove build artifacts and untracked files (keeps the .venv folder and .env files).
 clean:
