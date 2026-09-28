@@ -16,7 +16,7 @@ help:
 	@echo "Typical workflow:"
 	@echo "  make init                     Set up the project and development environment"
 	@echo "  make check                    Format and run quality checks"
-	@echo "  make ci                       Run the lockfile, quality, and test checks"
+	@echo "  make ci                       Run the checks and the test suite"
 	@echo "  make clean                    Remove build artifacts and untracked files"
 	@echo ""
 	@echo "All targets:"
@@ -30,13 +30,18 @@ sync: pyproject.toml
 
 ## Run code quality checks.
 check:
+	@$(UV) lock --check
 	@$(UV) run --quiet python scripts/add_ruff_rule_links.py
 	@$(UV) run --quiet python scripts/lint_makefile.py
 	@$(UV) run --quiet python scripts/check.py
 
-## Run the lockfile, quality, and test checks.
-ci:
-	@$(UV) run --no-sync --quiet python scripts/ci.py
+## Run the checks and the test suite under coverage.
+ci: check
+	@if test -d tests; then \
+		$(UV) run --quiet coverage run -m pytest -q && $(UV) run --quiet coverage report; \
+	else \
+		echo "No tests directory; skipping the test suite."; \
+	fi
 
 ## Remove build artifacts and untracked files (keeps the .venv folder and .env files).
 clean:
