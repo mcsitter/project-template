@@ -164,7 +164,7 @@ def clean_untracked(*, dry_run: bool, assume_yes: bool) -> int:
     if not assume_yes and not _prompt("Delete these files? [y/N] "):
         print("File removal skipped.")
         return 0
-    remove = _run(["git", "clean", "-xdf", *excludes])
+    remove = _run(["git", "clean", "-xdf", *excludes], capture=True)
     if remove.returncode != 0:
         print(remove.stderr.strip() or "Could not remove files.", file=sys.stderr)
         return remove.returncode

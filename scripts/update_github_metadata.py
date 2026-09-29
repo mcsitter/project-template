@@ -35,6 +35,14 @@ def _run(
     )
 
 
+def _login() -> str | None:
+    """Return the authenticated GitHub login, or None when it is unreadable."""
+    result = _run(["gh", "api", "user", "--jq", ".login"], capture=True)
+    if result.returncode != 0:
+        return None
+    return result.stdout.strip() or None
+
+
 def update_metadata() -> int:
     """Create or update the configured GitHub repository."""
     if shutil.which("gh") is None:
@@ -53,11 +61,17 @@ def update_metadata() -> int:
     if not project_name or not description:
         print("Copier answers are missing project metadata; skipping.")
         return 0
-    name = repository_name(project_name)
+    owner = _login()
+    if not owner:
+        print("Could not determine the GitHub account; skipping.")
+        return 0
+    # gh spells repositories as [HOST/]OWNER/REPO, so the owner is not optional.
+    name = f"{owner}/{repository_name(project_name)}"
     exists = _run(["gh", "repo", "view", name], capture=True)
     if exists.returncode == 0:
         result = _run(
             ["gh", "repo", "edit", name, "--description", description],
+            capture=True,
         )
         action = "updated"
     else:
@@ -75,6 +89,7 @@ def update_metadata() -> int:
                 "--remote",
                 "origin",
             ],
+            capture=True,
         )
         action = "created"
     if result.returncode != 0:
