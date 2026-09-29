@@ -25,15 +25,6 @@ dev = [
   { include-group = "types" },
 ]
 types = []
-{%- if project_name_snake_case != "project_template" %}
-
-[tool.setuptools]
-package-dir = { "" = "src" }
-
-[tool.setuptools.packages.find]
-where = ["src"]
-
-{%- endif %}
 
 [build-system]
 requires = ["setuptools", "wheel"]
@@ -48,15 +39,6 @@ version_provider = "pep621"
 update_changelog_on_bump = true
 major_version_zero = true
 {%- endif %}
-{%- if typing %}
-
-[tool.mypy]
-ignore_missing_imports = true
-{%- endif %}
-
-[tool.pytest.ini_options]
-addopts = ["-q"]
-testpaths = ["tests"]
 
 [tool.coverage.run]
 branch = true
@@ -71,6 +53,15 @@ omit = ["*/__main__.py", "*/.venv/*"]
 fail_under = {% if project_name_snake_case == "project_template" %}0{% else %}60{% endif %}
 show_missing = true
 skip_covered = false
+{%- if typing %}
+
+[tool.mypy]
+ignore_missing_imports = true
+{%- endif %}
+
+[tool.pytest.ini_options]
+addopts = ["-q"]
+testpaths = ["tests"]
 
 [tool.ruff]
 line-length = 88
@@ -124,3 +115,11 @@ ignore = [
 
 [tool.ruff.lint.flake8-type-checking]
 runtime-evaluated-base-classes = ["pydantic.BaseModel"]
+{%- if project_name_snake_case != "project_template" %}
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+{%- endif %}
