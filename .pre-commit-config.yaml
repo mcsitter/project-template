@@ -39,7 +39,9 @@ repos:
     rev: v1.5.1
     hooks:
       - id: tombi-format
+        exclude: ^uv\.lock$
       - id: tombi-lint
+        exclude: ^uv\.lock$
 
   - repo: https://github.com/biomejs/pre-commit
     rev: v2.5.9
