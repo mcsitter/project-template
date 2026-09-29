@@ -1,0 +1,9 @@
+version: 2
+updates:
+  # The workflow pins actions to commit SHAs, so Dependabot has to be
+  # configured for it to keep them current. The `# vX` comments after each pin
+  # are what Dependabot reads to know which release to move to.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
