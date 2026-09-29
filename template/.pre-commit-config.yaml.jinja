@@ -40,9 +40,14 @@ repos:
   - repo: https://github.com/tombi-toml/tombi-pre-commit
     rev: v1.5.1
     hooks:
+      # Tombi fetches the SchemaStore catalog on every run, which fails in
+      # sandboxes without network. Offline mode skips the fetch; formatting is
+      # unaffected, only SchemaStore-backed validation is.
       - id: tombi-format
+        args: [--offline]
         exclude: ^uv\.lock$
       - id: tombi-lint
+        args: [--offline]
         exclude: ^uv\.lock$
 
   - repo: https://github.com/biomejs/pre-commit
