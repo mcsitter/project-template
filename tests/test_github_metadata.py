@@ -38,7 +38,7 @@ def in_project(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
 def _fake_gh(
     monkeypatch: pytest.MonkeyPatch,
     *,
-    login: str = "mcsitter",
+    login: str = "octocat",
     view_found: bool = False,
     write_error: str = "",
 ) -> list[list[str]]:
@@ -67,7 +67,7 @@ def test_repository_name_is_kebab_case() -> None:
 @pytest.mark.parametrize(
     ("reply", "expected"),
     [
-        (_completed(stdout="mcsitter\n"), "mcsitter"),
+        (_completed(stdout="octocat\n"), "octocat"),
         (_completed(stdout="\n"), None),
         (_completed(returncode=1), None),
     ],
@@ -99,7 +99,7 @@ def test_update_creates_an_owner_qualified_repository(
 
     assert update_metadata() == 0
     create = next(c for c in calls if c[1:3] == ["repo", "create"])
-    assert create[3] == "mcsitter/my-project"
+    assert create[3] == "octocat/my-project"
 
 
 @pytest.mark.usefixtures("in_project")
@@ -110,7 +110,7 @@ def test_update_edits_an_owner_qualified_repository(
 
     assert update_metadata() == 0
     edit = next(c for c in calls if c[1:3] == ["repo", "edit"])
-    assert edit[3] == "mcsitter/my-project"
+    assert edit[3] == "octocat/my-project"
     assert not any(c[1:3] == ["repo", "create"] for c in calls)
 
 
