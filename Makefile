@@ -51,6 +51,6 @@ clean:
 init:
 	@$(UV) run --quiet python scripts/init.py
 
-## Test the Copier template by applying it to itself.
+## Re-apply the template to this repo, rewriting the files it generates.
 test-template:
 	uvx --isolated --refresh --from copier@latest copier copy --defaults --overwrite --vcs-ref=HEAD . . --quiet
