@@ -3,7 +3,6 @@ MAKEFLAGS += --no-print-directory
 .PHONY: check ci clean help init sync test-template
 
 UV ?= uv
-VENV_DIR := .venv
 
 ## Show available commands.
 help:

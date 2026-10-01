@@ -11,7 +11,6 @@ MAKEFLAGS += --no-print-directory
 .PHONY: {{ phony_targets | sort | join(" ") }}
 
 UV ?= uv
-VENV_DIR := .venv
 
 ## Show available commands.
 help:
