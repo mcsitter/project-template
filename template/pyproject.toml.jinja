@@ -42,7 +42,7 @@ major_version_zero = true
 
 [tool.coverage.run]
 branch = true
-source = ["src"{% if project_name_snake_case == "project_template" %}, "scripts"{% endif %}]
+source = ["src"{% if is_template %}, "scripts"{% endif %}]
 omit = ["*/__main__.py", "*/.venv/*"]
 
 # A floor, not a target. It exists to catch a large regression; it is not a
@@ -50,7 +50,7 @@ omit = ["*/__main__.py", "*/.venv/*"]
 # The template itself is excluded: its scripts are thin subprocess wrappers, and
 # a floor there would only buy tests that execute lines.
 [tool.coverage.report]
-fail_under = {% if project_name_snake_case == "project_template" %}0{% else %}60{% endif %}
+fail_under = {% if is_template %}0{% else %}60{% endif %}
 show_missing = true
 skip_covered = false
 {%- if typing %}
@@ -66,7 +66,7 @@ testpaths = ["tests"]
 [tool.ruff]
 line-length = 88
 output-format = "concise"
-{%- if project_name_snake_case == "project_template" %}
+{%- if is_template %}
 extend-exclude = [
   '*\{\{*\}\}*',
   '*\{\%*\%\}*',
@@ -115,7 +115,7 @@ ignore = [
 
 [tool.ruff.lint.flake8-type-checking]
 runtime-evaluated-base-classes = ["pydantic.BaseModel"]
-{%- if project_name_snake_case != "project_template" %}
+{%- if not is_template %}
 
 [tool.setuptools]
 package-dir = { "" = "src" }

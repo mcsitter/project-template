@@ -53,4 +53,11 @@ init:
 
 ## Re-apply the template to this repo, rewriting the files it generates.
 test-template:
-	uvx --isolated --refresh --from copier@latest copier copy --defaults --overwrite --vcs-ref=HEAD . . --quiet
+	uvx --isolated --refresh --from copier@latest copier copy . . --overwrite --vcs-ref=HEAD --quiet \
+		--data project_name=project_template \
+		--data project_type=package \
+		--data project_description="A Python package that does things." \
+		--data python_version=3.12 \
+		--data with_conventional_commits=true \
+		--data typing=false \
+		--data is_template=true

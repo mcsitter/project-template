@@ -2,7 +2,7 @@
 MAKEFLAGS += --no-print-directory
 
 {%- set phony_targets = ["check", "ci", "clean", "help", "init", "sync"] %}
-{%- if project_name_snake_case == "project_template" %}
+{%- if is_template %}
 {%- set phony_targets = phony_targets + ["test-template"] %}
 {%- endif %}
 {%- if project_type == "app" %}
@@ -42,7 +42,7 @@ sync: pyproject.toml
 ## Run code quality checks.
 check:
 	@$(UV) lock --check
-{%- if project_name_snake_case == "project_template" %}
+{%- if is_template %}
 	@$(UV) run --quiet python scripts/add_ruff_rule_links.py
 	@$(UV) run --quiet python scripts/lint_makefile.py
 {%- endif %}
@@ -63,17 +63,24 @@ clean:
 ## Initialize a Git repository, install dependencies, and create the initial commit.
 init:
 	@$(UV) run --quiet python scripts/init.py
-{%- if project_name_snake_case != "project_template" %}
+{%- if not is_template %}
 	@$(UV) run --quiet python scripts/update_github_metadata.py
 	@$(UV) run --quiet python scripts/update_vscode_extensions.py
 {%- endif %}
 
 
-{%- if project_name_snake_case == "project_template" %}
+{%- if is_template %}
 
 ## Re-apply the template to this repo, rewriting the files it generates.
 test-template:
-	uvx --isolated --refresh --from copier@latest copier copy --defaults --overwrite --vcs-ref=HEAD . . --quiet
+	uvx --isolated --refresh --from copier@latest copier copy . . --overwrite --vcs-ref=HEAD --quiet \
+		--data project_name=project_template \
+		--data project_type=package \
+		--data project_description="A Python package that does things." \
+		--data python_version=3.12 \
+		--data with_conventional_commits=true \
+		--data typing=false \
+		--data is_template=true
 {%- endif %}
 
 {%- if project_type == "app" %}

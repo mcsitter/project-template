@@ -51,6 +51,15 @@ project_name_snake_case:
   when: false
   default: "{{ project_name | lower | replace(' ', '_') }}"
 
+# True only when the template is applied to the template repository itself,
+# which is what turns on the repository-only targets, scripts, and settings.
+# It is a question of its own rather than a name comparison, because
+# "Project Template" and "project_template" snake-case to the same value and
+# the default project name is the former.
+is_template:
+  when: false
+  default: false
+
 _exclude:
   - .git
   - ^.gitignore$
