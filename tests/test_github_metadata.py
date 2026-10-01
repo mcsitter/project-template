@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import subprocess
 import sys
 from pathlib import Path
@@ -40,6 +41,7 @@ def _fake_gh(
     *,
     login: str = "octocat",
     view_found: bool = False,
+    description: str = "Do things.",
     write_error: str = "",
 ) -> list[list[str]]:
     """Record every gh call, answering as a GitHub CLI would."""
@@ -51,7 +53,9 @@ def _fake_gh(
         if verb == ["api", "user"]:
             return _completed(stdout=f"{login}\n")
         if verb == ["repo", "view"]:
-            return _completed(returncode=0 if view_found else 1)
+            if not view_found:
+                return _completed(returncode=1)
+            return _completed(stdout=json.dumps({"description": description}))
         if verb[0] == "repo" and write_error:
             return _completed(returncode=1, stderr=f"{write_error}\n")
         return _completed()
@@ -106,12 +110,23 @@ def test_update_creates_an_owner_qualified_repository(
 def test_update_edits_an_owner_qualified_repository(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    calls = _fake_gh(monkeypatch, view_found=True)
+    calls = _fake_gh(monkeypatch, view_found=True, description="Stale.")
 
     assert update_metadata() == 0
     edit = next(c for c in calls if c[1:3] == ["repo", "edit"])
     assert edit[3] == "octocat/my-project"
     assert not any(c[1:3] == ["repo", "create"] for c in calls)
+
+
+@pytest.mark.usefixtures("in_project")
+def test_update_skips_a_repository_that_already_matches(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    calls = _fake_gh(monkeypatch, view_found=True, description="Do things.")
+
+    assert update_metadata() == 0
+    assert "unchanged" in capsys.readouterr().out
+    assert not any(c[1] == "repo" and c[2] in {"edit", "create"} for c in calls)
 
 
 @pytest.mark.usefixtures("in_project")

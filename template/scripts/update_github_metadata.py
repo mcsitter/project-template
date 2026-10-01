@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import json
 import shutil
 import subprocess
 import sys
@@ -43,6 +44,19 @@ def _login() -> str | None:
     return result.stdout.strip() or None
 
 
+def _description(name: str) -> str | None:
+    """Return a repository description, or None when the repository is missing."""
+    result = _run(["gh", "repo", "view", name, "--json", "description"], capture=True)
+    if result.returncode != 0:
+        return None
+    try:
+        payload = json.loads(result.stdout)
+    except json.JSONDecodeError:
+        return None
+    description = payload.get("description")
+    return description.strip() if isinstance(description, str) else ""
+
+
 def update_metadata() -> int:
     """Create or update the configured GitHub repository."""
     if shutil.which("gh") is None:
@@ -67,8 +81,11 @@ def update_metadata() -> int:
         return 0
     # gh spells repositories as [HOST/]OWNER/REPO, so the owner is not optional.
     name = f"{owner}/{repository_name(project_name)}"
-    exists = _run(["gh", "repo", "view", name], capture=True)
-    if exists.returncode == 0:
+    current = _description(name)
+    if current is not None and current == description:
+        print(f"GitHub repository unchanged: {name}")
+        return 0
+    if current is not None:
         result = _run(
             ["gh", "repo", "edit", name, "--description", description],
             capture=True,
