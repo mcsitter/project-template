@@ -30,7 +30,7 @@ help:
 	@echo "  make clean                    Remove build artifacts and untracked files"
 	@echo ""
 	@echo "All targets:"
-	@awk '/^## / {desc=$$0; sub(/^## /,"",desc)} /^[a-zA-Z_-]+:/ {target=$$1; sub(/:$$/,"",target); printf "  %-28s %s\n", target, desc; desc=""}' $(MAKEFILE_LIST) | sort
+	@awk '/^## / {desc=$$0; sub(/^## /,"",desc)} /^[a-zA-Z_-]+:/ && $$0 !~ /^[a-zA-Z_-]+:[[:space:]]*export/ {target=$$1; sub(/:$$/,"",target); printf "  %-28s %s\n", target, desc; desc=""}' $(MAKEFILE_LIST) | sort
 	@echo ""
 
 ## Synchronize dependencies and install development tools.
