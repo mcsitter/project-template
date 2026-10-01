@@ -41,7 +41,11 @@ def _changed_files() -> list[str]:
 
 
 def _prompt() -> bool:
-    return input("Commit template changes? [y/N] ").strip().casefold() in {"y", "yes"}
+    try:
+        answer = input("Commit template changes? [y/N] ")
+    except EOFError:
+        return False
+    return answer.strip().casefold() in {"y", "yes"}
 
 
 def update_template(*, assume_yes: bool = False) -> int:
@@ -60,7 +64,9 @@ def update_template(*, assume_yes: bool = False) -> int:
             COPIER_SPEC,
             "copier",
             "update",
-            "--defaults",
+            # No --defaults here: `copier update` replays the answers recorded
+            # in .copier-answers.yml, and --defaults would overwrite them with
+            # the template's defaults, renaming the project.
             "--quiet",
         ]
     )
