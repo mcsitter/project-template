@@ -1,0 +1,28 @@
+"""Tests for the {{ project_name_snake_case }} app entrypoint."""
+
+from __future__ import annotations
+
+import runpy
+from pathlib import Path
+from typing import TYPE_CHECKING
+
+import {{ project_name_snake_case }}.main as entrypoint
+
+if TYPE_CHECKING:
+    import pytest
+
+GREETING = "Hello, you are running {{ project_name }}!\n"
+
+
+def test_main_prints_the_greeting(capsys: pytest.CaptureFixture[str]) -> None:
+    """The entrypoint greets by name."""
+    entrypoint.main()
+
+    assert capsys.readouterr().out == GREETING
+
+
+def test_running_the_script_greets(capsys: pytest.CaptureFixture[str]) -> None:
+    """Executing the entrypoint as a script reaches the same greeting."""
+    runpy.run_path(str(Path(entrypoint.__file__)), run_name="__main__")
+
+    assert capsys.readouterr().out == GREETING

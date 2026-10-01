@@ -71,3 +71,7 @@ _exclude:
   - requirements.txt
   - "{% if project_type == 'package' %}main.py{% endif %}"
   - "{% if project_type == 'package' %}.python-version{% endif %}"
+  # Only an app has an entrypoint, so only an app has a test for it.
+  - "{% if project_type == 'package' %}test_main.py{% endif %}"
+  # Only an app has an entrypoint, so only an app has a test for it.
+  - "{% if project_type == 'package' %}test_main.py{% endif %}"
