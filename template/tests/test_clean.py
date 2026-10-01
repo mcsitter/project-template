@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import subprocess
 import sys
 from pathlib import Path
 
@@ -14,6 +15,7 @@ from clean import (
     _remove,
     _walk_artifacts,
     clean_artifacts,
+    clean_untracked,
 )
 
 NothingTracked = "nothing-tracked"
@@ -152,3 +154,18 @@ def test_remove_handles_a_directory_and_a_file(tmp_path: Path) -> None:
 
     assert not directory.exists()
     assert not file_path.exists()
+
+
+def test_clean_untracked_reports_a_git_failure(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    def _run(command: list[str], **_: object) -> subprocess.CompletedProcess[str]:
+        if "-xdn" in command:
+            return subprocess.CompletedProcess(command, 0, "Would remove extra\n", "")
+        return subprocess.CompletedProcess(command, 1, "", "fatal: cannot remove\n")
+
+    monkeypatch.setattr("clean._run", _run)
+
+    assert clean_untracked(dry_run=False, assume_yes=True) == 1
+    assert "cannot remove" in capsys.readouterr().err
