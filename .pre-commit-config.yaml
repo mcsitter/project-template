@@ -29,14 +29,14 @@ repos:
       - id: sentence-per-line
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.16.3
+    rev: v0.16.10
     hooks:
       - id: ruff-check
         args: [--fix]
       - id: ruff-format
 
   - repo: https://github.com/tombi-toml/tombi-pre-commit
-    rev: v1.5.1
+    rev: v1.7.2
     hooks:
       # Tombi fetches the SchemaStore catalog on every run, which fails in
       # sandboxes without network. Offline mode skips the fetch; formatting is
@@ -49,14 +49,14 @@ repos:
         exclude: ^uv\.lock$
 
   - repo: https://github.com/biomejs/pre-commit
-    rev: v2.5.9
+    rev: v2.5.15
     hooks:
       - id: biome-format
         args:
           - "--indent-style=space"
 
   - repo: https://github.com/commitizen-tools/commitizen
-    rev: v4.17.1
+    rev: v4.19.1
     hooks:
       - id: commitizen
         stages: [commit-msg]
