@@ -35,7 +35,7 @@ That repository must be public for generated projects to work.
 
 ## The development environment
 
-`make init` (or `make sync`) creates a virtualenv in `.venv` with [uv](https://docs.astral.sh/uv/).
+`make init` (or `make install`) creates a virtualenv in `.venv` with [uv](https://docs.astral.sh/uv/).
 Every Makefile target goes through `uv run`, so you never have to activate it.
 
 If you do want a shell inside the virtualenv, `activate` has to be sourced, not executed:
@@ -89,7 +89,7 @@ any diff it leaves behind is drift between the template and its own generated ou
 
 `uv.lock` and `src/` are gitignored here, because Copier regenerates both and the template's
 own generated output is not meant to be tracked.
-A fresh clone therefore has no lockfile, so run `make sync` once before `make check` or
+A fresh clone therefore has no lockfile, so run `make install` once before `make check` or
 `make ci`, which fail on a missing `uv.lock`.
 
 The template switches on its own extra targets, scripts, and coverage settings through a hidden

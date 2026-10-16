@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := help
 MAKEFLAGS += --no-print-directory
-.PHONY: check ci clean help init sync test-template
+.PHONY: check ci clean help init install test-template
 
 UV ?= uv
 
@@ -22,8 +22,8 @@ help:
 	@awk '/^## / {desc=$$0; sub(/^## /,"",desc)} /^[a-zA-Z_-]+:/ && $$0 !~ /^[a-zA-Z_-]+:[[:space:]]*export/ {target=$$1; sub(/:$$/,"",target); printf "  %-28s %s\n", target, desc; desc=""}' $(MAKEFILE_LIST) | sort
 	@echo ""
 
-## Synchronize dependencies and install development tools.
-sync: pyproject.toml
+## Install dependencies and the development tools.
+install: pyproject.toml
 	$(UV) sync --group dev --quiet
 	$(UV) run --quiet prek install
 

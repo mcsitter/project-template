@@ -2,7 +2,7 @@
 """Initialize a project repository, install tooling, and commit the result.
 
 ``git init`` is performed first so the remaining steps have a repository to
-work with, then the Makefile's ``sync`` and ``check`` targets are invoked. When
+work with, then the Makefile's ``install`` and ``check`` targets are invoked. When
 the repository has no commits yet the staged tree is offered for an initial
 commit. Nothing is ever pushed; that stays a deliberate, manual step.
 """
@@ -69,7 +69,7 @@ def _initial_commit(*, assume_yes: bool) -> bool:
 def initialize(extra_targets: list[str], *, assume_yes: bool) -> int:
     """Initialize the repository and run the requested setup steps."""
     _ensure_repository()
-    for target in ("sync", *extra_targets, "check"):
+    for target in ("install", *extra_targets, "check"):
         status = _make(target)
         if status != 0:
             print(f"Setup step failed: make {target}", file=sys.stderr)
@@ -86,7 +86,7 @@ def main() -> int:
         "--target",
         action="append",
         default=[],
-        help="Extra make target to run between sync and check.",
+        help="Extra make target to run between install and check.",
     )
     parser.add_argument(
         "--yes",
