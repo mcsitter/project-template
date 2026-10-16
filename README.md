@@ -26,6 +26,8 @@ copier update
 - `make check` — format and run quality checks (Ruff)
 - `make ci` — run the checks and the test suite
 - `make clean` — remove build artifacts and untracked files
+- `make build` — build the Docker image (apps only)
+- `make cd` — tag the image with the commit and push it to `$REGISTRY` (apps only)
 - `make run` — apps only
 
 The generated pre-commit config pulls two hooks from [`mcsitter/pre-commit-hooks`](https://github.com/mcsitter/pre-commit-hooks).

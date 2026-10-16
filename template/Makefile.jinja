@@ -6,7 +6,7 @@ MAKEFLAGS += --no-print-directory
 {%- set phony_targets = phony_targets + ["test-template"] %}
 {%- endif %}
 {%- if project_type == "app" %}
-{%- set phony_targets = phony_targets + ["run"] %}
+{%- set phony_targets = phony_targets + ["build", "cd", "run"] %}
 {%- endif %}
 .PHONY: {{ phony_targets | sort | join(" ") }}
 
@@ -23,6 +23,8 @@ help:
 	@echo "Typical workflow:"
 	@echo "  make init                     Set up the project and development environment"
 {%- if project_type == "app" %}
+	@echo "  make build                    Build the Docker image"
+	@echo "  make cd                       Build the image and push it to the registry"
 	@echo "  make run                      Run the {{ project_type }}"
 {%- endif %}
 	@echo "  make check                    Format and run quality checks"
@@ -83,6 +85,20 @@ test-template:
 {%- endif %}
 
 {%- if project_type == "app" %}
+
+DOCKER_IMAGE := {{ project_name_kebab_case }}:latest
+
+## Build the Docker image.
+build:
+	docker build -t $(DOCKER_IMAGE) .
+
+## Build the image and push it to the registry in $$REGISTRY.
+cd: build
+	@: $${REGISTRY:?set REGISTRY to the target registry, e.g. export REGISTRY=registry.example.com}
+	docker tag $(DOCKER_IMAGE) $$REGISTRY/{{ project_name_kebab_case }}:latest
+	docker tag $(DOCKER_IMAGE) $$REGISTRY/{{ project_name_kebab_case }}:$$(git rev-parse --short HEAD)
+	docker push $$REGISTRY/{{ project_name_kebab_case }}:latest
+	docker push $$REGISTRY/{{ project_name_kebab_case }}:$$(git rev-parse --short HEAD)
 
 ## Run the {{ project_name }} app.
 run:

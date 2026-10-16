@@ -104,7 +104,7 @@ def test_jinja_phony_list_contains_names_not_line_numbers() -> None:
 
 def test_jinja_phony_list_omits_the_conditional_only_targets() -> None:
     lines = ['{%- set phony_targets = ["stale"] %}', "## Run it.", "ci: check"]
-    targets = ["check", "ci", "run", "test-template"]
+    targets = ["build", "cd", "check", "ci", "run", "test-template"]
 
     updated = lint_makefile.update_jinja_phony(lines, targets)
 
