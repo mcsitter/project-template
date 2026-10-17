@@ -108,4 +108,4 @@ def test_jinja_phony_list_omits_the_conditional_only_targets() -> None:
 
     updated = lint_makefile.update_jinja_phony(lines, targets)
 
-    assert updated[0] == '{%- set phony_targets = ["check", "ci"] %}'
+    assert updated[0] == '{%- set phony_targets = ["build", "cd", "check", "ci"] %}'

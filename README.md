@@ -23,11 +23,13 @@ copier update
 ## What you get
 
 - `make init` — install dependencies and create the initial commit
+- `make install` — install dependencies and the development tools
 - `make check` — format and run quality checks (Ruff)
-- `make ci` — run the checks and the test suite
+- `make test` — run the test suite
+- `make build` — build the Docker image (apps) or the wheel and sdist (packages)
+- `make ci` — `check`, `test`, and `build`
+- `make cd` — tag and push the image to `$REGISTRY` (apps) or publish the package (packages)
 - `make clean` — remove build artifacts and untracked files
-- `make build` — build the Docker image (apps only)
-- `make cd` — tag the image with the commit and push it to `$REGISTRY` (apps only)
 - `make run` — apps only
 
 The generated pre-commit config pulls two hooks from [`mcsitter/pre-commit-hooks`](https://github.com/mcsitter/pre-commit-hooks).

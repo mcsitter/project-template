@@ -150,9 +150,7 @@ def update_jinja_phony(lines: list[str], targets: list[str]) -> list[str]:
     """Update Jinja phony target list."""
     updated = lines.copy()
     target_list = ", ".join(
-        f'"{target}"'
-        for target in targets
-        if target not in ("build", "cd", "run", "test-template")
+        f'"{target}"' for target in targets if target not in ("run", "test-template")
     )
     phony_line = f"{{%- set phony_targets = [{target_list}] %}}"
 

@@ -73,5 +73,7 @@ _exclude:
   - "{% if project_type == 'package' %}.python-version{% endif %}"
   # Only an app has an entrypoint, so only an app has a test for it.
   - "{% if project_type == 'package' %}test_main.py{% endif %}"
-  # Only an app has an entrypoint, so only an app has a test for it.
-  - "{% if project_type == 'package' %}test_main.py{% endif %}"
+  # Docker files only for apps
+  - "{% if project_type == 'package' %}Dockerfile{% endif %}"
+  - "{% if project_type == 'package' %}docker-compose.yml{% endif %}"
+  - "{% if project_type == 'package' %}.dockerignore{% endif %}"

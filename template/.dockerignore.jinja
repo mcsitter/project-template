@@ -1,0 +1,63 @@
+# {{ project_name }} .dockerignore
+# Files and directories to exclude from Docker build context
+
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache
+.mypy_cache
+.ruff_cache
+.coverage
+htmlcov
+.venv
+venv
+*.egg-info
+build
+dist
+
+# Virtual environments
+.venv/
+venv/
+env/
+.env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment files (secrets should be in .env at runtime, not build time)
+.env
+.env.local
+.env.*.local
+
+# Copier
+.copier-answers.yml
+
+# CI/CD
+.github/
+
+# Documentation
+docs/
+README.md
+CHANGELOG.md
+
+# Tests (unless you need them in the image)
+tests/
+
+# Scripts (unless needed at runtime)
+scripts/
+
+# Data (bind-mounted at runtime)
+data/

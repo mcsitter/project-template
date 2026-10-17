@@ -1,0 +1,36 @@
+# {{ project_name }} Dockerfile
+# This is a minimal Dockerfile that works for most Python apps.
+# Customize as needed for your specific app requirements.
+
+FROM python:{{ python_version }}-slim
+
+# Install system dependencies (uv, tzdata for timezone support)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    tzdata \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install uv for fast Python package management
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+
+# Set working directory
+WORKDIR /app
+
+# Copy dependency files first for better caching
+COPY pyproject.toml uv.lock ./
+
+# Install dependencies
+RUN uv sync --frozen --no-dev
+
+# Copy application code
+COPY src/ ./src/
+
+# Copy any data directory (for apps that need persistent data)
+# This is optional - remove if not needed
+COPY data/ ./data/
+
+# Expose the default port (change as needed)
+EXPOSE 5000
+
+# Default command - override in docker-compose.yml or at runtime
+CMD ["python", "-m", "{{ project_name_snake_case }}.main"]

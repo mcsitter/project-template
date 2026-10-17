@@ -1,0 +1,40 @@
+# {{ project_name }} Docker Compose
+# This is a minimal docker-compose.yml that works for most Python apps.
+# Customize as needed for your specific app requirements.
+
+services:
+  app:
+    build: .
+    env_file: .env
+    restart: unless-stopped
+    # Bind-mount data directory for persistent data (optional - remove if not needed)
+    volumes:
+      - ./data:/app/data
+    environment:
+      # Set data directory for the app (used if app needs persistent storage)
+      DATA_DIR: /app/data
+    # Expose the default port (change as needed)
+    ports:
+      - "5000:5000"
+    # Healthcheck - adjust path/port as needed for your app
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - >-
+          import urllib.request;
+          urllib.request.urlopen("http://127.0.0.1:5000/healthz", timeout=3)
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # Worker service (optional - uncomment and customize if you need background workers)
+  # worker:
+  #   build: .
+  #   env_file: .env
+  #   restart: unless-stopped
+  #   volumes:
+  #     - ./data:/app/data
+  #   command: ["python", "-m", "{{ project_name_snake_case }}.worker"]

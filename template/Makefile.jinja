@@ -1,12 +1,12 @@
 .DEFAULT_GOAL := help
 MAKEFLAGS += --no-print-directory
 
-{%- set phony_targets = ["check", "ci", "clean", "help", "init", "install"] %}
+{%- set phony_targets = ["build", "cd", "check", "ci", "clean", "help", "init", "install", "test"] %}
 {%- if is_template %}
 {%- set phony_targets = phony_targets + ["test-template"] %}
 {%- endif %}
 {%- if project_type == "app" %}
-{%- set phony_targets = phony_targets + ["build", "cd", "run"] %}
+{%- set phony_targets = phony_targets + ["run"] %}
 {%- endif %}
 .PHONY: {{ phony_targets | sort | join(" ") }}
 
@@ -21,15 +21,16 @@ help:
 	@echo "  make <target>"
 	@echo ""
 	@echo "Typical workflow:"
-	@echo "  make init                     Set up the project and development environment"
+	@echo "  make install                  Install development dependencies"
+	@echo "  make check                    Validate code{% if project_type == 'app' %}/config{% endif %}"
+	@echo "  make test                     Run tests{% if project_type == 'app' %}/integration tests{% endif %}"
+	@echo "  make build                    {% if project_type == 'app' %}Build Docker image{% else %}Build wheel/sdist{% endif %}"
+	@echo "  make ci                       check + test + build"
+	@echo "  make cd                       {% if project_type == 'app' %}Deploy application{% else %}Publish package{% endif %}"
+	@echo "  make clean                    Remove build artifacts"
 {%- if project_type == "app" %}
-	@echo "  make build                    Build the Docker image"
-	@echo "  make cd                       Build the image and push it to the registry"
-	@echo "  make run                      Run the {{ project_type }}"
+	@echo "  make run                      Run the app"
 {%- endif %}
-	@echo "  make check                    Format and run quality checks"
-	@echo "  make ci                       Run the checks and the test suite"
-	@echo "  make clean                    Remove build artifacts and untracked files"
 	@echo ""
 	@echo "All targets:"
 	@awk '/^## / {desc=$$0; sub(/^## /,"",desc)} /^[a-zA-Z_-]+:/ && $$0 !~ /^[a-zA-Z_-]+:[[:space:]]*export/ {target=$$1; sub(/:$$/,"",target); printf "  %-28s %s\n", target, desc; desc=""}' $(MAKEFILE_LIST) | sort
@@ -40,7 +41,7 @@ install: pyproject.toml
 	$(UV) sync --group dev --quiet
 	$(UV) run --quiet prek install
 
-## Run code quality checks.
+## Validate code{% if project_type == 'app' %}/config{% endif %}.
 check:
 	@$(UV) lock --check
 {%- if is_template %}
@@ -49,13 +50,36 @@ check:
 {%- endif %}
 	@$(UV) run --quiet python scripts/check.py
 
+## Run tests{% if project_type == 'app' %}/integration tests{% endif %}.
+test:
+	@$(UV) run --quiet pytest -q
+
+## Build {% if project_type == 'app' %}Docker image{% else %}wheel/sdist{% endif %}.
+build:
+{%- if project_type == "app" %}
+	docker build -t {{ project_name_kebab_case }}:latest .
+{%- else %}
+	$(UV) build
+{%- endif %}
+
 # Mark the commands below as running in CI so tools that adapt to it can tell.
 # An existing CI value wins, so a provider's own setting is never overwritten.
-## Run the checks and the test suite under coverage.
+## Run check + test + build.
 ci: export CI := $(if $(CI),$(CI),true)
-ci: check
-	@$(UV) run --quiet coverage run -m pytest -q
-	@$(UV) run --quiet coverage report
+ci: check test build
+
+## Deploy application (app) or publish package (package).
+cd: build
+{%- if project_type == "app" %}
+	@: $${REGISTRY:?set REGISTRY to the target registry, e.g. export REGISTRY=registry.example.com}
+	docker tag {{ project_name_kebab_case }}:latest $$REGISTRY/{{ project_name_kebab_case }}:latest
+	docker tag {{ project_name_kebab_case }}:latest $$REGISTRY/{{ project_name_kebab_case }}:$$(git rev-parse --short HEAD)
+	docker push $$REGISTRY/{{ project_name_kebab_case }}:latest
+	docker push $$REGISTRY/{{ project_name_kebab_case }}:$$(git rev-parse --short HEAD)
+{%- else %}
+	@echo "Publish not configured. Add your publish steps here."
+	@echo "Example: uv publish"
+{%- endif %}
 
 ## Remove build artifacts and untracked files (keeps the .venv folder and .env files).
 clean:
@@ -85,20 +109,6 @@ test-template:
 {%- endif %}
 
 {%- if project_type == "app" %}
-
-DOCKER_IMAGE := {{ project_name_kebab_case }}:latest
-
-## Build the Docker image.
-build:
-	docker build -t $(DOCKER_IMAGE) .
-
-## Build the image and push it to the registry in $$REGISTRY.
-cd: build
-	@: $${REGISTRY:?set REGISTRY to the target registry, e.g. export REGISTRY=registry.example.com}
-	docker tag $(DOCKER_IMAGE) $$REGISTRY/{{ project_name_kebab_case }}:latest
-	docker tag $(DOCKER_IMAGE) $$REGISTRY/{{ project_name_kebab_case }}:$$(git rev-parse --short HEAD)
-	docker push $$REGISTRY/{{ project_name_kebab_case }}:latest
-	docker push $$REGISTRY/{{ project_name_kebab_case }}:$$(git rev-parse --short HEAD)
 
 ## Run the {{ project_name }} app.
 run:
